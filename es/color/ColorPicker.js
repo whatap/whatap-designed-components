@@ -132,5 +132,4 @@ function () {
   return ColorPicker;
 }();
 
-var _default = ColorPicker;
-exports.default = _default;
+exports.default = ColorPicker;

@@ -30,7 +30,7 @@ export function HashString(str) {
   return Math.abs(hash);
 }
 
-class ColorPicker {
+export default class ColorPicker {
   constructor() {
     this.color = palette.errorBlack;
   }
@@ -96,5 +96,3 @@ class ColorPicker {
     }
   }
 }
-
-export default ColorPicker;

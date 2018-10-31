@@ -1,9 +1,14 @@
 {
   "name": "whatap-designed-components",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "Designed components used at WhaTap",
-  "main": "es/index.js",
-  "module": "src/index.js",
+  "main": "src/index.js",
+  "module": "es/index.js",
+  "files": [
+    "umd/",
+    "es/",
+    "src/"
+  ],
   "scripts": {
     "test": "node ./es/test/*.js",
     "build:umd": "webpack",
