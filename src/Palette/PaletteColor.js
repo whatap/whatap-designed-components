@@ -1,8 +1,9 @@
 import { CoreFunc } from '../core'
 
 export default class PaletteColor {
-  constructor(id, rgb) {
+  constructor(id, rgb, oid) {
     this.id = id;
+    this.oid = oid || 0;
     this.rgb = rgb || [0, 0, 0];
     this.nextColor = undefined;
     this.hasChild = false;
@@ -12,22 +13,22 @@ export default class PaletteColor {
     this.rgb = rgb; 
   }
 
-  printRgb = () => {
-    return `rgb(${this.rgb[0]},${this.rgb[1]},${this.rgb[2]})`
+  static printRgb = (rgb) => {
+    return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`
   }
 
-  printRgbWithAlpha = (alpha) => {
+  static printRgbWithAlpha = (alpha) => {
     if (typeof alpha !== 'number') return;
     return `rgba(${this.rgb[0]},${this.rgb[1]},${this.rgb[2]},${alpha})`
   }
 
-  setNextColor = () => {
+  setNextColor = (oid) => {
     let minIndex = CoreFunc.getMinValueIndexFromArray(this.rgb).index;
     let newColor = this.rgb.map((el, idx) => {
       if (idx === minIndex) return (el + 30) % 256;
       else return el;
     })
-    let nextColor = new PaletteColor(this.id + 1, newColor);
+    let nextColor = new PaletteColor(this.id + 1, newColor, oid);
     this.nextColor = nextColor;
   }
 

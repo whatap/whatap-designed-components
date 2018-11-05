@@ -54,4 +54,37 @@ assert.equal(
   "rgb(56,35,126)"
 )
 
+var palette2 = new Palette();
+
+console.log("3. Get RGB from Oid && Get Oid from RGB");
+assert.equal(
+  palette2.getColorFromPalette(1234567890),
+  "rgb(116,143,252)"
+)
+
+assert.equal(
+  palette2.getOidFromColor("rgb(116,143,252)"),
+  1234567890
+)
+
+assert.equal(
+  palette2.getColorFromPalette(1234567890),
+  "rgb(146,143,252)"
+)
+
+assert.equal(
+  palette2.getOidFromColor("rgb(146,143,252)"),
+  1234567890
+)
+
+assert.equal(
+  palette2.getColorFromPalette(1234567890),
+  "rgb(146,173,252)"
+)
+
+assert.equal(
+  palette2.getOidFromColor("rgb(146,173,252)"),
+  1234567890
+)
+
 console.log("** Completed ** ");
