@@ -1,6 +1,8 @@
 const path = require('path');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 const config = {
+  mode: 'production',
   context: path.resolve(__dirname, 'src'), 
   entry: {
     main: './index.js'
@@ -17,7 +19,12 @@ const config = {
         loader: "babel-loader"
       }
     ]
-  }
+  },
+  plugins: [
+    new CleanWebpackPlugin(['es', 'umd'], {
+      exclude: ['.gitignore']
+    })
+  ]
 }
 
 module.exports = config;
