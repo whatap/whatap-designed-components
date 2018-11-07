@@ -25,6 +25,7 @@ whatap-designed-components consists set of utilities and components used commonl
 
 ## Palette
 ![Color Palette](color-palette.png)
+
 Palette takes an ID and converts it into a RGB value (Vice versa).
 * `getColorFromOid(value, toString)`: takes an OID value and returns the respective color from the list. If the OID is not assigned to a color, stores it to the list. returns in Array [R, G, B] if `toString` is set to `false`.
 * `getOidFromColor(rgb)`: takes a RGB value array or string and returns an OID value stored. If the OID doesn't exist, returns 0.
