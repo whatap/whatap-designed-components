@@ -18,9 +18,9 @@ export default class ColorPicker {
     this.color = errorBlack;
   }
 
-  fromInteger(value, typeString = true) {
+  fromInteger(value, typeString = true, alpha) {
     let calVal = Math.abs(value);
-    let rgb = [0, 0, 0];
+    let rgb = [0, 0, 0, 0];
 
     let pos = 0;
     while (calVal > 0 ) {
@@ -32,8 +32,16 @@ export default class ColorPicker {
       rgb[i] = Number(rgb[i] % 256).toFixed(0);
     }
 
+    if (alpha) {
+      rgb.push(Number(alpha));
+    }
+
     if (typeString) {
-      return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 1)`;
+      if (alpha) {
+        return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
+      } else {
+        return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+      }
     } else {
       return rgb;
     }
