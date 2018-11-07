@@ -1,6 +1,6 @@
 {
   "name": "whatap-designed-components",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Designed components used at WhaTap",
   "main": "src/index.js",
   "module": "es/index.js",
@@ -10,7 +10,7 @@
     "src/"
   ],
   "scripts": {
-    "test:assert": "npm run build:es6 && node ./es/test/ColorPicker.test.js && node ./es/test/Palette2.test.js && node ./es/test/HeapSort.test.js",
+    "test:assert": "npm run build:es6 && node ./es/test/ColorPicker.test.js && node ./es/test/Palette.test.js && node ./es/test/HeapSort.test.js && node ./es/test/QuickSort.test.js",
     "build:umd": "webpack",
     "build:es6": "babel src --out-dir es",
     "build:all": "npm run test:assert && npm run build:umd && npm run build:es6"
