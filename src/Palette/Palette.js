@@ -33,6 +33,7 @@ export default class Palette {
   }
 
   /**
+   * @private
    * Change Default Palette to RGB
    */
   initList = () => {
