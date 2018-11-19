@@ -69,7 +69,7 @@ export default class ColorPicker {
     } else if (value.slice(0, 3) === 'rgb') {
       this.color = value;
     } else {
-      this.color = fromString(value);
+      this.color = this.fromString(value);
     }
   }
 
@@ -78,7 +78,7 @@ export default class ColorPicker {
    * @param {string} hex 
    */
   hexToRgb(hex) {
-    if (typeof hex !== 'string' && value.length === 0) return;
+    if (typeof hex !== 'string' && hex.length === 0) return;
     let color;
     let hasAlpha = false;
     let rgb = [0, 0, 0, 0];

@@ -44,8 +44,9 @@ function storageError() {
  * https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
  */
 function isStorageAvailable(type) {
+  let storage;
   try {
-    let storage = window[type];
+    storage = window[type];
     let x = '__storage_test__';
 
     storage.setItem(x, x);
