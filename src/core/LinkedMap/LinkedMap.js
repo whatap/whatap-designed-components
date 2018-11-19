@@ -76,8 +76,9 @@ class LinkedMap {
     }
     let tab = this.table;
     let index = this.hash(key) % tab.length;
-    for (let e = tab[index]; e !== null; e = e.next) {
-      if ( e.key === key) {
+    console.log(key);
+    for (let e = tab[index]; e !== null && typeof e !== 'undefined'; e = e.next) {
+      if ( e.key === key ) {
         let old = e.value;
         e.value = value;
         switch(m) {
@@ -169,7 +170,7 @@ class LinkedMap {
     let tab = this.table;
     let index = this.hash(key) % tab.length;
 
-    for (let e = tab[index]; e !== null; e = e.next) {
+    for (let e = tab[index]; e !== null && typeof e !== 'undefined'; e = e.next) {
       if (e.key === key) {
         let old = e.value;
         switch (m) {
@@ -242,7 +243,7 @@ class LinkedMap {
     }
     let tab = this.table;
     let index = this.hash(key) % tab.length;
-    for (let e = tab[index], prev = null; e !== null; prev = e, e= e.next) {
+    for (let e = tab[index], prev = null; e !== null && typeof e !== 'undefined'; prev = e, e= e.next) {
       if (e.key === key) {
         if (prev !== null) {
           prev.next = e.next;
@@ -323,7 +324,7 @@ class LinkedMap {
     let tab = this.table;
     let index = this.hash(key) % tab.length;
 
-    for (let e = tab[index]; e !== null; e = e.next) {
+    for (let e = tab[index]; e !== null && typeof e !== 'undefined'; e = e.next) {
       if (e.key === key) {
         return e.value;
       }

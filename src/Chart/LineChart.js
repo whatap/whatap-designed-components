@@ -5,12 +5,13 @@
  */
 import { LinkedMap } from '../core';
 import { Palette } from '../Palette';
+import moment from 'moment';
 import WChart from './WChart';
 
 const UNIX_TIMESTAMP = 1000;
 const MINUTE_IN_SECONDS = 60;
 
-const default_options = {
+const defaultOptions = {
   xAxis: {
     maxPlot: 600,
     interval: 60,
@@ -35,7 +36,7 @@ const default_options = {
       return d;
     },
     plots: 4,
-    maxValue: 1000,
+    maxValue: 100,
     minValue: 0,
     axisLine: {
       display: true,
@@ -54,21 +55,21 @@ const default_options = {
 
 
 class LineChart extends WChart{
-  constructor(bind_id, color_id, options) {
+  constructor(bindId, colorId, options) {
     super();
-    this.init(bind_id);
+    this.init(bindId);
     this.initOptions(options);
     this.initCanvas();
 
-    this.palette = new Palette(color_id);
+    this.palette = new Palette(colorId);
   }
 
-  init = (bind_id) => {
-    this.canvas = document.getElementById(bind_id);
+  init = (bindId) => {
+    this.canvas = document.getElementById(bindId);
     this.ctx = this.canvas.getContext("2d");
     this.data = new LinkedMap();
 
-    this.chart_attr = {
+    this.chartAttr = {
       x: 0,
       y: 0,
       w: 0,
@@ -77,18 +78,18 @@ class LineChart extends WChart{
   }
 
   initOptions = (options) => {
-    this.config = { ...default_options, ...options };
+    this.config = { ...defaultOptions, ...options };
 
-    this.start_time = this.config.xAxis.startTime;
-    this.end_time = this.config.xAxis.endTime;
+    this.startTime = this.config.xAxis.startTime;
+    this.endTime = this.config.xAxis.endTime;
   }
 
   initCanvas = () => {
     this.wSetBoundingClientRect(this.canvas);
     this.wSetScreenRatio();
 
-    let width = this.bc_rect.width;
-    let height = this.bc_rect.height;
+    let width = this.bcRect.width;
+    let height = this.bcRect.height;
 
     this.canvas.width = width * this.ratio;
     this.canvas.height = height * this.ratio;
@@ -101,19 +102,20 @@ class LineChart extends WChart{
     if (!dataset) return;
     let that = this;
     let config = this.config;
+    console.log(dataset);
 
     dataset.map((ds, idx) => {
-      let color_value = that.palette.getColorFromOid(ds.oid);
-      that.data.put(ds.oid, { oname: ds.oname, data: ds.data, color: color_value });
+      let colorValue = that.palette.getColorFromOid(ds.oid);
+      that.data.put(ds.oid, { oname: ds.oname, data: ds.data, color: colorValue });
       /**
        * Only get the initial start time when the option is set to `isFixed=true`
        */
-      if (config.xAxis.time.isFixed) {
+      if (config.xAxis.isFixed) {
         if (idx === 0) {
-          that.start_time = ds.data[0][0];
+          that.startTime = ds.data[0][0];
         } else {
-          if (that.start_time > ds.data[idx][0]) {
-            that.start_time = ds.data[idx][0];
+          if (that.startTime > ds.data[idx][0]) {
+            that.startTime = ds.data[idx][0];
           }
         }
       }
@@ -128,17 +130,17 @@ class LineChart extends WChart{
 
     dataset.map((ds) => {
       if (that.data.containsKey(ds.oid)) {
-        let c_data = that.data.get(ds.oid);
+        let cData = that.data.get(ds.oid);
         ds.data.map((datum) => {
-          c_data.data.push(datum);
+          cData.data.push(datum);
         })
-        if (c_data.data.length > maxPlot) {
-          let overflow = c_data.data.length - maxPlot;
-          c_data.data = c_data.data.slice(overflow);
+        if (cData.data.length > maxPlot) {
+          let overflow = cData.data.length - maxPlot;
+          cData.data = cData.data.slice(overflow);
         }
       } else {
-        let color_value = that.palette.getColorFromOid(ds.oid);
-        that.data.put(ds.oid, { oname: ds.oname, data: ds.data, color: color_value });
+        let colorValue = that.palette.getColorFromOid(ds.oid);
+        that.data.put(ds.oid, { oname: ds.oname, data: ds.data, color: colorValue });
       }
     })
   }
@@ -160,25 +162,25 @@ class LineChart extends WChart{
   _drawBackground = () => {
     let that = this;
     let ctx = this.ctx;
-    let width = this.bc_rect.width;
-    let height = this.bc_rect.height;
+    let width = this.bcRect.width;
+    let height = this.bcRect.height;
     let plots = this.plots;
     ctx.clearRect(0, 0, width, height);
 
     ctx.font = "8px Verdana";
     ctx.save();
 
-    let y_axis_max = this.config.yAxis.tickFormat(this.config.yAxis.maxValue);
-    this.chart_attr.x = parseInt(ctx.measureText(y_axis_max).width) + 5;
-    this.chart_attr.y = 5;
-    this.chart_attr.w = width - this.chart_attr.x;
-    this.chart_attr.h = height - this.chart_attr.y - 20;
+    let yAxisMax = this.config.yAxis.tickFormat(this.config.yAxis.maxValue);
+    this.chartAttr.x = parseInt(ctx.measureText(yAxisMax).width) + 5;
+    this.chartAttr.y = 5;
+    this.chartAttr.w = width - this.chartAttr.x;
+    this.chartAttr.h = height - this.chartAttr.y - 20;
     
     ctx.fillStyle = "rgba(0,0,0,0)";
     ctx.fillRect(0, 0, width, height);
 
     // ctx.fillStyle = "rgb(50,100,100)";
-    // ctx.fillRect(this.chart_attr.x, this.chart_attr.y, this.chart_attr.w, this.chart_attr.h);
+    // ctx.fillRect(this.chartAttr.x, this.chartAttr.y, this.chartAttr.w, this.chartAttr.h);
   }
 
   /**
@@ -187,36 +189,38 @@ class LineChart extends WChart{
   _drawAxis = () => {
     let that = this;
     let ctx = this.ctx;
-    let width = this.bc_rect.width;
-    let height = this.bc_rect.height;
+    let width = this.bcRect.width;
+    let height = this.bcRect.height;
     let config = this.config;
-    const { x, y, w, h } = this.chart_attr;
+    let startTime = this.startTime;
+    let endTime = this.endTime;
+    const { x, y, w, h } = this.chartAttr;
     const { interval, maxPlot } = config.xAxis;
 
     /**
      * Plot gridline
      */
     if (config.xAxis.plotLine.display) {
-      let draw_plots = maxPlot / interval;
-      let width_interval = w / draw_plots;
-      for (let i = 1; i < draw_plots; i++) {
+      let drawPlots = maxPlot / interval;
+      let widthInterval = w / drawPlots;
+      for (let i = 1; i < drawPlots; i++) {
         ctx.beginPath();
         ctx.setLineDash([1, 2]);
         ctx.strokeStyle = config.xAxis.plotLine.color;
-        ctx.moveTo(x + (i * width_interval), y);
-        ctx.lineTo(x + (i * width_interval), y + h);
+        ctx.moveTo(x + (i * widthInterval), y);
+        ctx.lineTo(x + (i * widthInterval), y + h);
         ctx.stroke();
       }
     }
 
     if (config.yAxis.plotLine.display) {
-      let height_interval = h / config.yAxis.plots;
+      let heightInterval = h / config.yAxis.plots;
       for (let i = 0; i < config.yAxis.plots; i++) {
         ctx.beginPath();
         ctx.setLineDash([1, 2]);
         ctx.strokeStyle = config.yAxis.plotLine.color;
-        ctx.moveTo(x, y + (i * height_interval));
-        ctx.lineTo(x + w, y + (i * height_interval));
+        ctx.moveTo(x, y + (i * heightInterval));
+        ctx.lineTo(x + w, y + (i * heightInterval));
         ctx.stroke();
       }
     }
@@ -226,23 +230,25 @@ class LineChart extends WChart{
      * TODO: Change demo to actual data;
      */
     if (config.xAxis.tick.display) {
-      let draw_plots = maxPlot / interval;
-      let width_interval = w / draw_plots;
-      for (let i = 1; i < draw_plots; i++) {
+      let drawPlots = maxPlot / interval;
+      let widthInterval = w / drawPlots;
+      for (let i = 1; i < drawPlots; i++) {
         ctx.restore();
-        ctx.fillText("00:00", x + (i * width_interval) - 12, y + h + 9);
+        console.log(startTime);
+        let time_value = moment.unix((startTime + (i * interval * 1000)) / 1000).format("HH:mm");
+        ctx.fillText(time_value, x + (i * widthInterval) - 12, y + h + 9);
       }
 
     }
 
     if (config.yAxis.tick.display) {
-      let height_interval = h / config.yAxis.plots;
+      let heightInterval = h / config.yAxis.plots;
       let { maxValue } = config.yAxis;
-      let tick_value = maxValue;
+      let tickValue = maxValue;
       for (let i = 0; i < config.yAxis.plots + 1; i++) {
         ctx.textAlign = "right";
-        ctx.fillText(tick_value, x - 2, (y + 3) + (i * height_interval));
-        tick_value -= (maxValue / (config.yAxis.plots));
+        ctx.fillText(tickValue, x - 2, (y + 3) + (i * heightInterval));
+        tickValue -= (maxValue / (config.yAxis.plots));
       }
     }
 
@@ -271,7 +277,7 @@ class LineChart extends WChart{
   _drawData = () => {
     let that = this;
     let ctx = this.ctx;
-    const { x, y, w, h } = this.chart_attr;
+    const { x, y, w, h } = this.chartAttr;
     const { minValue, maxValue } = this.config.yAxis;
     
     let en = this.data.keys();
@@ -280,22 +286,22 @@ class LineChart extends WChart{
       let value = this.data.get(key);
 
       value.data.map((datum, idx) => {
-        if (datum[0] < this.start_time || datum[0] > this.end_time ) return;
-        let x_pos = (datum[0] - this.start_time) / (this.end_time - this.start_time);
-        let x_coord = x + (w * x_pos);
+        if (datum[0] < this.startTime || datum[0] > this.endTime ) return;
+        let xPos = (datum[0] - this.startTime) / (this.endTime - this.startTime);
+        let xCoord = x + (w * xPos);
 
-        let y_pos = 1;
+        let yPos = 1;
         if ( datum[1] > minValue ) {
           if ( datum[1] > maxValue ) {
-            y_pos = 0;
+            yPos = 0;
           } else {
-            y_pos = 1 - (datum[1] - minValue) / (maxValue - minValue);
+            yPos = 1 - (datum[1] - minValue) / (maxValue - minValue);
           }
         }
-        let y_coord = y + (h * y_pos);
+        let yCoord = y + (h * yPos);
 
-        ctx.fillStyle = "#333333";
-        ctx.fillRect(x_coord, y_coord, 1, 1);
+        // ctx.fillStyle = "#333333";
+        // ctx.fillRect(xCoord, yCoord, 0.5, 0.5);
 
         /**
          * plot과 plot을 이어주는 line
@@ -303,13 +309,13 @@ class LineChart extends WChart{
         if (idx === 0) {
           ctx.beginPath();
           ctx.strokeStyle = value.color;
-          ctx.moveTo(x_coord, y_coord);
+          ctx.moveTo(xCoord, yCoord);
         } else {
-          ctx.lineTo(x_coord, y_coord);
+          ctx.lineTo(xCoord, yCoord);
           ctx.stroke();
 
           ctx.beginPath();
-          ctx.moveTo(x_coord, y_coord);
+          ctx.moveTo(xCoord, yCoord);
         }
       })
     }

@@ -1,13 +1,13 @@
 
 export default class WChart {
   constructor() {
-    this.bc_rect = null;
+    this.bcRect = null;
     this.ratio = null;
   }
 
   wSetBoundingClientRect = (element) => {
-    if ( this.bc_rect === null ) {
-      this.bc_rect = element.getBoundingClientRect();
+    if ( this.bcRect === null ) {
+      this.bcRect = element.getBoundingClientRect();
     }
   }
 
@@ -21,7 +21,7 @@ export default class WChart {
   }
 
   clearClientRect = () => {
-    this.bc_rect = null;
+    this.bcRect = null;
   }
 
   clearScreenRatio = () => {
