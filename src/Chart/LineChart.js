@@ -7,6 +7,7 @@ import { LinkedMap } from '../core';
 import { Palette } from '../Palette';
 import moment from 'moment';
 import WChart from './WChart';
+import { getMousePos  } from './helper/MouseEvent';
 
 const UNIX_TIMESTAMP = 1000;
 const MINUTE_IN_SECONDS = 60;
@@ -64,6 +65,32 @@ class LineChart extends WChart{
     this.palette = new Palette(colorId);
   }
 
+	handleMouseMove = (evt) => {
+		let ctx = this.ctx;
+		let mousePos = getMousePos(this.wGetBoundingClientRect(), evt);
+		let { mx, my } = mousePos;
+		console.log(mx + " / " + my);	
+		if (this.tooltipOn) {
+			this.drawChart();
+		}
+		this.tooltipOn = false;
+		for (let i = 0; i < this.dots.length; i++) {
+			let dot = this.dots[i];
+			let dx = mx - dot.x;
+			let dy = mx - dot.y;
+			if (dx * dx + dy * dy < dot.offset) {
+				ctx.textAlign = "left";
+				ctx.fillStyle = "black";
+				ctx.fillText(dot.value.toFixed(1), 10, 10);
+
+				console.log(dot.value);
+				this.tooltipOn = true;
+
+				break;
+			}
+		}
+	}
+
   init = (bindId) => {
     this.canvas = document.getElementById(bindId);
     this.ctx = this.canvas.getContext("2d");
@@ -75,6 +102,8 @@ class LineChart extends WChart{
       w: 0,
       h: 0,
     }
+		this.dots = [];
+		this.tooltipOn = false;
   }
 
   initOptions = (options) => {
@@ -85,8 +114,9 @@ class LineChart extends WChart{
   }
 
   initCanvas = () => {
-    this.wSetBoundingClientRect(this.canvas);
-    this.wSetScreenRatio();
+    this.wGetBoundingClientRect(this.canvas);
+    this.wGetScreenRatio();
+		this.canvas.addEventListener('mousemove', this.handleMouseMove);
 
     let width = this.bcRect.width;
     let height = this.bcRect.height;
@@ -277,9 +307,12 @@ class LineChart extends WChart{
   _drawData = () => {
     let that = this;
     let ctx = this.ctx;
+	let startTime = this.startTime;
+	let endTime = this.endTime;
     const { x, y, w, h } = this.chartAttr;
     const { minValue, maxValue } = this.config.yAxis;
     
+	let _dots = [];
     let en = this.data.keys();
     while(en.hasMoreElements()) {
       let key = en.nextElement();
@@ -317,8 +350,17 @@ class LineChart extends WChart{
           ctx.beginPath();
           ctx.moveTo(xCoord, yCoord);
         }
+
+				_dots.push({
+				  x: xCoord,
+					y: yCoord,
+					r: 5,
+					offset: 100,
+					value: datum[1]
+				})
       })
     }
+	this.dots = _dots;
   }
 
   /**

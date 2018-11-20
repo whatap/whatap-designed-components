@@ -5,13 +5,14 @@ export default class WChart {
     this.ratio = null;
   }
 
-  wSetBoundingClientRect = (element) => {
+  wGetBoundingClientRect = (element) => {
     if ( this.bcRect === null ) {
       this.bcRect = element.getBoundingClientRect();
     }
+		return this.bcRect;
   }
 
-  wSetScreenRatio = () => {
+  wGetScreenRatio = () => {
     if ( this.ratio === null) {
       this.ratio = window.devicePixelRatio;
     }
