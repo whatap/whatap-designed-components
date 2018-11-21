@@ -63,31 +63,68 @@ class LineChart extends WChart{
     this.initCanvas();
 
     this.palette = new Palette(colorId);
+		this.focused = undefined;
   }
 
 	handleMouseMove = (evt) => {
+		let that = this;
 		let ctx = this.ctx;
 		let mousePos = getMousePos(this.wGetBoundingClientRect(), evt);
 		let { mx, my } = mousePos;
-		console.log(mx + " / " + my);	
 		if (this.tooltipOn) {
 			this.drawChart();
 		}
 		this.tooltipOn = false;
+		let tooltipList = [];
 		for (let i = 0; i < this.dots.length; i++) {
 			let dot = this.dots[i];
-			let dx = mx - dot.x;
-			let dy = mx - dot.y;
-			if (dx * dx + dy * dy < dot.offset) {
-				ctx.textAlign = "left";
-				ctx.fillStyle = "black";
-				ctx.fillText(dot.value.toFixed(1), 10, 10);
+			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset) {
+				tooltipList.push(dot);
+			}
+		}
+		if (tooltipList.length !== 0) {
+			// ctx.textAlign = "left";
+			// ctx.font = "12px Verdana";
+			// ctx.fillStyle = "black";
+			// tooltipList.map((ttl, idx) => {
+			// 	let output = `${ttl.oname}: ${ttl.value.toFixed(1)}`;
+			// 	ctx.fillText(output, mx + 5, my + (idx * 10));
+			// });
+			let list = tooltipList.map((ttl, idx) => {
+				let colorLabel = drawTooltipCircle(ttl.color, style);
+				return `<span>${colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}<br/></span>`;
+			});
+			this.tooltip.style.cssText = `position:absolute;float:left;left:${mx + 15}px;top:${my}px;z-index:10000;visibility:visible`;
+			this.tooltip.innerHTML = "";
+			list.map((ttl, idx) => {
+				that.tooltip.innerHTML += ttl;
+			});
+			this.tooltipOn = true;
+		} else {
+			this.tooltip.style.cssText = "visibility:hidden";
+		}
+	}
 
-				console.log(dot.value);
-				this.tooltipOn = true;
-
+	handleMouseClick = (evt) => {
+		let ctx = this.ctx;
+		let mousePos = getMousePos(this.wGetBoundingClientRect(), evt);
+		let { mx, my } = mousePos;
+	
+		let dotSelected = false;
+		for (let i = 0; i < this.dots.length; i++) {
+			let dot = this.dots[i];
+			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset
+				&& dot.y > my - dot.offset && dot.y < my + dot.offset) {
+				this.focused = dot;
+				dotSelected = true;
+				this.drawChart();
 				break;
 			}
+		}
+
+		if (dotSelected === false) {
+			this.focused = undefined;
+			this.drawChart();
 		}
 	}
 
@@ -117,6 +154,7 @@ class LineChart extends WChart{
     this.wGetBoundingClientRect(this.canvas);
     this.wGetScreenRatio();
 		this.canvas.addEventListener('mousemove', this.handleMouseMove);
+		this.canvas.addEventListener('click', this.handleMouseClick);
 
     let width = this.bcRect.width;
     let height = this.bcRect.height;
@@ -264,7 +302,7 @@ class LineChart extends WChart{
       let widthInterval = w / drawPlots;
       for (let i = 1; i < drawPlots; i++) {
         ctx.restore();
-        console.log(startTime);
+				ctx.textAlign = "left";
         let time_value = moment.unix((startTime + (i * interval * 1000)) / 1000).format("HH:mm");
         ctx.fillText(time_value, x + (i * widthInterval) - 12, y + h + 9);
       }
@@ -307,12 +345,12 @@ class LineChart extends WChart{
   _drawData = () => {
     let that = this;
     let ctx = this.ctx;
-	let startTime = this.startTime;
-	let endTime = this.endTime;
+		let startTime = this.startTime;
+		let endTime = this.endTime;
     const { x, y, w, h } = this.chartAttr;
     const { minValue, maxValue } = this.config.yAxis;
     
-	let _dots = [];
+		let _dots = [];
     let en = this.data.keys();
     while(en.hasMoreElements()) {
       let key = en.nextElement();
@@ -342,6 +380,16 @@ class LineChart extends WChart{
         if (idx === 0) {
           ctx.beginPath();
           ctx.strokeStyle = value.color;
+					if (this.focused && this.focused.oid !== key) {
+						ctx.strokeStyle = "rgba(245,245,245,0.5)";
+					}
+					// if (this.focused && this.focused.oid === key) {
+					// 	ctx.save();
+					// 	ctx.textAlign = "left";
+					// 	ctx.fillText(`Currently Selected: ${value.oname}`, 100, 50);
+					// 	ctx.fillText(`Value: ${datum[1]}`, 100, 70);
+					// 	ctx.restore();
+					// }
           ctx.moveTo(xCoord, yCoord);
         } else {
           ctx.lineTo(xCoord, yCoord);
@@ -352,10 +400,13 @@ class LineChart extends WChart{
         }
 
 				_dots.push({
+					oid: key,
+					oname: value.oname,
+					color: value.color,
 				  x: xCoord,
 					y: yCoord,
 					r: 5,
-					offset: 100,
+					offset: 2,
 					value: datum[1]
 				})
       })
@@ -367,10 +418,23 @@ class LineChart extends WChart{
    * @private
    */
   _drawLabel = () => {
-
+		if (typeof this.tooltip === 'undefined') {
+			this.tooltip = document.createElement('div');
+			document.body.appendChild(this.tooltip);
+		}
   }
 
   
 }
+
+const style = 'border: none; display: block; float: left; width: 12px; height: 12px; margin-right: 4px; margin-top: 3px;';
+
+function drawTooltipCircle(color, style) {
+  var circle = '<span style="' + style + '"><svg height="12" width="12">'
+  circle += '<circle cx="6" cy="6" r="6" fill="' + color + '" />'
+  circle += '</svg></span>'
+  return circle
+}
+
 
 export default LineChart;
