@@ -129,6 +129,7 @@ class LineChart extends WChart{
 	}
 
   init = (bindId) => {
+    this.chartId = bindId;
     this.canvas = document.getElementById(bindId);
     this.ctx = this.canvas.getContext("2d");
     this.data = new LinkedMap();

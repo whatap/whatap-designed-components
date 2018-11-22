@@ -1,0 +1,22 @@
+// Button style
+
+.wBtn {
+  background: none;
+  border-radius: $border-radius-default;
+
+
+  &:focus,
+  &.focus {
+
+  }
+
+  &:active,
+  &.active {
+
+  }
+
+  &:disabled,
+  &.disabled {
+
+  }
+}
