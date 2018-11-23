@@ -7,7 +7,7 @@ import { LinkedMap } from '../core';
 import { Palette } from '../Palette';
 import moment from 'moment';
 import WChart from './WChart';
-import { getMousePos  } from './helper/MouseEvent';
+import { getMousePos  } from './helper/mouseEvent';
 
 const UNIX_TIMESTAMP = 1000;
 const MINUTE_IN_SECONDS = 60;
@@ -126,7 +126,11 @@ class LineChart extends WChart{
 			this.focused = undefined;
 			this.drawChart();
 		}
-	}
+  }
+  
+  handleMouseOut = (evt) => {
+    this.tooltip.style.cssText = "visibility:hidden";
+  }
 
   init = (bindId) => {
     this.chartId = bindId;
@@ -155,7 +159,8 @@ class LineChart extends WChart{
     this.wGetBoundingClientRect(this.canvas);
     this.wGetScreenRatio();
 		this.canvas.addEventListener('mousemove', this.handleMouseMove);
-		this.canvas.addEventListener('click', this.handleMouseClick);
+    this.canvas.addEventListener('click', this.handleMouseClick);
+    this.canvas.addEventListener('mouseout', this.handleMouseOut);
 
     let width = this.bcRect.width;
     let height = this.bcRect.height;
