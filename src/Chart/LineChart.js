@@ -79,7 +79,6 @@ function createStyle(mx, my) {
       output += `${key}:${innerStyle[key]};`
     }
   }
-  console.log(output);
   return output;
 }
 
@@ -106,8 +105,10 @@ class LineChart extends WChart{
 	handleMouseMove = (evt) => {
 		let that = this;
 		let ctx = this.ctx;
-		let mousePos = getMousePos(this.wGetBoundingClientRect(), evt);
-		let { mx, my } = mousePos;
+    let mousePos = getMousePos(this.wGetBoundingClientRect(), evt);
+    let { mx, my } = mousePos;
+    let posX = evt.clientX;
+    let posY = evt.clientY;
 		if (this.tooltipOn) {
 			this.drawChart();
 		}
@@ -136,7 +137,7 @@ class LineChart extends WChart{
         }
 				return tooltip;
       });
-			this.tooltip.style.cssText = createStyle(mx, my);
+			this.tooltip.style.cssText = createStyle(posX, posY);
 			this.tooltip.innerHTML = "";
 			list.map((ttl, idx) => {
 				that.tooltip.innerHTML += ttl;
