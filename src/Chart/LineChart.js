@@ -18,7 +18,7 @@ const MINUTE_IN_SECONDS = 60;
 
 const defaultOptions = {
   xAxis: {
-    maxPlot: 600,
+    maxPlot: 60,
     interval: 60,
     axisLine: {
       display: true,
@@ -236,20 +236,7 @@ class LineChart extends WChart{
        * Only get the initial start time when the option is set to `isFixed=false`
        */
       if (!config.xAxis.isFixed) {
-        // if (idx === 0) {
-        //   that.startTime = ds.data[0][0];
-        //   that.endTime = ds.data[0][0];
-        // }
-
-        // for (let i = 0; i < ds.data.length; i++) {
-        //   if (that.startTime > ds.data[i][0]) {
-        //     that.startTime = ds.data[i][0];
-        //   }
-        //   if (that.endTime < ds.data[i][0] ) {
-        //     that.endTime = ds.data[i][0];
-        //   }
-        // }
-        that.setTimeStandard(idx, ds.data);
+        that.setTimeStandard(ds.data, idx);
       }
       
     })
@@ -257,19 +244,20 @@ class LineChart extends WChart{
     this.drawChart();
   }
 
-  setTimeStandard = (idx, data) => {
+  setTimeStandard = (data, idx) => {
+    console.log(data);
     if (idx === 0) {
       this.startTime = data[0][0];
       this.endTime = data[0][0];
+    }
 
-      let length = data.length;
-      for (let i = 0; i < length; i++) {
-        if (this.startTime > data[i][0]) {
-          this.startTime = data[i][0];
-        }
-        if (this.endTime < data[i][0]) {
-          this.endTime = data[i][0];
-        }
+    let length = data.length;
+    for (let i = 0; i < length; i++) {
+      if (this.startTime > data[i][0]) {
+        this.startTime = data[i][0];
+      }
+      if (this.endTime < data[i][0]) {
+        this.endTime = data[i][0];
       }
     }
   }
@@ -279,24 +267,32 @@ class LineChart extends WChart{
     let that = this;
     const { maxPlot } = this.config.xAxis;
 
-    console.log(dataset);
     dataset.map((ds, idx) => {
       if (that.data.containsKey(ds.oid)) {
         let cData = that.data.get(ds.oid);
         ds.data.map((datum) => {
           cData.data.push(datum);
         })
-        heapSort.sort(ds.data);
-        if (cData.data.length > maxPlot) {
-          let overflow = cData.data.length - maxPlot;
-          cData.data = cData.data.slice(overflow);
-        }
-        that.setTimeStandard(idx, ds.data);
+        heapSort.sort(cData.data, false, 0);
       } else {
         let colorValue = that.palette.getColorFromOid(ds.oid);
         that.data.put(ds.oid, { oname: ds.oname, data: ds.data, color: colorValue });
       }
     })
+
+    let en = this.data.keys();
+    let idx = 0;
+    for (let idx = 0; en.hasMoreElements(); idx++) {
+      let key = en.nextElement();
+      let value = this.data.get(key);
+
+      if (value.data.length > maxPlot) {
+        let overflow = value.data.length - maxPlot;
+        console.log(overflow);
+        value.data = value.data.slice(overflow);
+        that.setTimeStandard(value.data, idx);
+      }
+    }
 
     this.drawChart();
   }
