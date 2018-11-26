@@ -236,22 +236,42 @@ class LineChart extends WChart{
        * Only get the initial start time when the option is set to `isFixed=false`
        */
       if (!config.xAxis.isFixed) {
-        if (idx === 0) {
-          that.startTime = ds.data[0][0];
-          that.endTime = ds.data[0][0];
-        }
+        // if (idx === 0) {
+        //   that.startTime = ds.data[0][0];
+        //   that.endTime = ds.data[0][0];
+        // }
 
-        for (let i = 0; i < ds.data.length; i++) {
-          if (that.startTime > ds.data[i][0]) {
-            that.startTime = ds.data[i][0];
-          }
-          if (that.endTime < ds.data[i][0] ) {
-            that.endTime = ds.data[i][0];
-          }
-        }
+        // for (let i = 0; i < ds.data.length; i++) {
+        //   if (that.startTime > ds.data[i][0]) {
+        //     that.startTime = ds.data[i][0];
+        //   }
+        //   if (that.endTime < ds.data[i][0] ) {
+        //     that.endTime = ds.data[i][0];
+        //   }
+        // }
+        that.setTimeStandard(idx, ds.data);
       }
       
     })
+
+    this.drawChart();
+  }
+
+  setTimeStandard = (idx, data) => {
+    if (idx === 0) {
+      this.startTime = data[0][0];
+      this.endTime = data[0][0];
+
+      let length = data.length;
+      for (let i = 0; i < length; i++) {
+        if (this.startTime > data[i][0]) {
+          this.startTime = data[i][0];
+        }
+        if (this.endTime < data[i][0]) {
+          this.endTime = data[i][0];
+        }
+      }
+    }
   }
 
   updateData = (dataset) => {
@@ -259,21 +279,26 @@ class LineChart extends WChart{
     let that = this;
     const { maxPlot } = this.config.xAxis;
 
-    dataset.map((ds) => {
+    console.log(dataset);
+    dataset.map((ds, idx) => {
       if (that.data.containsKey(ds.oid)) {
         let cData = that.data.get(ds.oid);
         ds.data.map((datum) => {
           cData.data.push(datum);
         })
+        heapSort.sort(ds.data);
         if (cData.data.length > maxPlot) {
           let overflow = cData.data.length - maxPlot;
           cData.data = cData.data.slice(overflow);
         }
+        that.setTimeStandard(idx, ds.data);
       } else {
         let colorValue = that.palette.getColorFromOid(ds.oid);
         that.data.put(ds.oid, { oname: ds.oname, data: ds.data, color: colorValue });
       }
     })
+
+    this.drawChart();
   }
  
   resetData = () =>{
