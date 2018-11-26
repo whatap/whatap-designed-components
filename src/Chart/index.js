@@ -1,3 +1,4 @@
 import LineChart from './LineChart'
+import ChartMediator from './mediator/ChartMediator'
 
-export { LineChart };
+export { LineChart, ChartMediator };

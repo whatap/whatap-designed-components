@@ -76,7 +76,6 @@ class LinkedMap {
     }
     let tab = this.table;
     let index = this.hash(key) % tab.length;
-    console.log(key);
     for (let e = tab[index]; e !== null && typeof e !== 'undefined'; e = e.next) {
       if ( e.key === key ) {
         let old = e.value;

@@ -3,11 +3,15 @@
  * created by MinGu Lee (@immigration9)
  * All rights reserved to WhaTap Labs 2018
  */
-import { LinkedMap } from '../core';
+import { LinkedMap, HeapSort } from '../core';
 import { Palette } from '../Palette';
 import moment from 'moment';
 import WChart from './WChart';
-import { getMousePos  } from './helper/mouseEvent';
+import { getMousePos  } from './helper/mouseEvt';
+import { mergeDeep } from './helper/mergeDeep';
+import { drawXtick, drawYtick } from './helper/drawTick';
+import { drawXplot, drawYplot, drawXaxis, drawYaxis } from './helper/drawBorder';
+import ChartMediator from './mediator/ChartMediator';
 
 const UNIX_TIMESTAMP = 1000;
 const MINUTE_IN_SECONDS = 60;
@@ -54,6 +58,32 @@ const defaultOptions = {
   }
 }
 
+function createStyle(mx, my) {
+  const innerStyle = {
+    'position': 'absolute',
+    'float': 'left',
+    'left': `${mx + 15}px`,
+    'top': `${my}px`,
+    'z-index': 10000,
+    'visibility': 'visible',
+    'background-color': '#000000',
+    'border-radius': '6px',
+    'padding': '3px',
+    'color': '#ffffff',
+    'font-size': '8px',
+  }
+
+  let output = '';
+  for (let key in innerStyle) {
+    if (innerStyle.hasOwnProperty(key)) {
+      output += `${key}:${innerStyle[key]};`
+    }
+  }
+  console.log(output);
+  return output;
+}
+
+const heapSort = new HeapSort();
 
 class LineChart extends WChart{
   constructor(bindId, colorId, options) {
@@ -63,7 +93,14 @@ class LineChart extends WChart{
     this.initCanvas();
 
     this.palette = new Palette(colorId);
-		this.focused = undefined;
+    this.focused = undefined;
+    this.mediator = ChartMediator;
+  }
+
+  notifyMediator = (action, arg) => {
+    if (typeof this.mediator[action] !== 'undefined') {
+      this.mediator[action](arg);
+    }
   }
 
 	handleMouseMove = (evt) => {
@@ -91,10 +128,15 @@ class LineChart extends WChart{
 			// 	ctx.fillText(output, mx + 5, my + (idx * 10));
 			// });
 			let list = tooltipList.map((ttl, idx) => {
-				let colorLabel = drawTooltipCircle(ttl.color, style);
-				return `<span>${colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}<br/></span>`;
-			});
-			this.tooltip.style.cssText = `position:absolute;float:left;left:${mx + 15}px;top:${my}px;z-index:10000;visibility:visible`;
+        let colorLabel = drawTooltipCircle(ttl.color, style);
+        let tooltip = `<span>${colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}<br/></span>`;
+        if (idx === 0) {
+          let timestamp = `<span>${moment.unix(ttl.time / 1000)}</span><br/>`
+          return timestamp + tooltip;
+        }
+				return tooltip;
+      });
+			this.tooltip.style.cssText = createStyle(mx, my);
 			this.tooltip.innerHTML = "";
 			list.map((ttl, idx) => {
 				that.tooltip.innerHTML += ttl;
@@ -102,30 +144,32 @@ class LineChart extends WChart{
 			this.tooltipOn = true;
 		} else {
 			this.tooltip.style.cssText = "visibility:hidden";
-		}
+    }
+    
+    // notifyMediator("moved", data);
 	}
 
 	handleMouseClick = (evt) => {
-		let ctx = this.ctx;
-		let mousePos = getMousePos(this.wGetBoundingClientRect(), evt);
+    let mousePos = getMousePos(this.wGetBoundingClientRect(), evt);
 		let { mx, my } = mousePos;
-	
-		let dotSelected = false;
-		for (let i = 0; i < this.dots.length; i++) {
+    let max = this.dots.length;
+
+    let selectedDot;
+		for (let i = 0; i < max; i++) {
 			let dot = this.dots[i];
 			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset
 				&& dot.y > my - dot.offset && dot.y < my + dot.offset) {
-				this.focused = dot;
-				dotSelected = true;
-				this.drawChart();
+        selectedDot = dot;
 				break;
 			}
 		}
+    this.drawSelected(selectedDot);
+    this.notifyMediator("clicked", selectedDot);
+  }
 
-		if (dotSelected === false) {
-			this.focused = undefined;
-			this.drawChart();
-		}
+  drawSelected = (dot) => {
+    this.focused = dot;
+    this.drawChart();
   }
   
   handleMouseOut = (evt) => {
@@ -149,7 +193,8 @@ class LineChart extends WChart{
   }
 
   initOptions = (options) => {
-    this.config = { ...defaultOptions, ...options };
+    this.config = mergeDeep(defaultOptions, options);
+    console.log(this.config);
 
     this.startTime = this.config.xAxis.startTime;
     this.endTime = this.config.xAxis.endTime;
@@ -176,20 +221,31 @@ class LineChart extends WChart{
     if (!dataset) return;
     let that = this;
     let config = this.config;
-    console.log(dataset);
 
     dataset.map((ds, idx) => {
       let colorValue = that.palette.getColorFromOid(ds.oid);
+
+      /**
+       * Sorts the inner data in ascending order.
+       */
+      heapSort.sort(ds.data, false, 0);
+
       that.data.put(ds.oid, { oname: ds.oname, data: ds.data, color: colorValue });
       /**
-       * Only get the initial start time when the option is set to `isFixed=true`
+       * Only get the initial start time when the option is set to `isFixed=false`
        */
-      if (config.xAxis.isFixed) {
+      if (!config.xAxis.isFixed) {
         if (idx === 0) {
           that.startTime = ds.data[0][0];
-        } else {
-          if (that.startTime > ds.data[idx][0]) {
-            that.startTime = ds.data[idx][0];
+          that.endTime = ds.data[0][0];
+        }
+
+        for (let i = 0; i < ds.data.length; i++) {
+          if (that.startTime > ds.data[i][0]) {
+            that.startTime = ds.data[i][0];
+          }
+          if (that.endTime < ds.data[i][0] ) {
+            that.endTime = ds.data[i][0];
           }
         }
       }
@@ -268,81 +324,38 @@ class LineChart extends WChart{
     let config = this.config;
     let startTime = this.startTime;
     let endTime = this.endTime;
-    const { x, y, w, h } = this.chartAttr;
-    const { interval, maxPlot } = config.xAxis;
+    let chartAttr = this.chartAttr;
+    const { x, y, w, h } = chartAttr;
+    const { interval, maxPlot, plotLine: xPlotLine, axisLine: xAxisLine } = config.xAxis;
+    const { maxValue, minValue, plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
+
+    const xOptions = {
+      format: "HH:mm:ss",
+      minOffset: 3,
+      chartAttr, startTime, endTime, xPlotLine, xAxisLine
+    }
+    const yOptions = { 
+      chartAttr, maxValue, minValue, yPlotLine, yAxisLine,
+      plots: config.yAxis.plots
+    } 
 
     /**
      * Plot gridline
      */
-    if (config.xAxis.plotLine.display) {
-      let drawPlots = maxPlot / interval;
-      let widthInterval = w / drawPlots;
-      for (let i = 1; i < drawPlots; i++) {
-        ctx.beginPath();
-        ctx.setLineDash([1, 2]);
-        ctx.strokeStyle = config.xAxis.plotLine.color;
-        ctx.moveTo(x + (i * widthInterval), y);
-        ctx.lineTo(x + (i * widthInterval), y + h);
-        ctx.stroke();
-      }
-    }
-
-    if (config.yAxis.plotLine.display) {
-      let heightInterval = h / config.yAxis.plots;
-      for (let i = 0; i < config.yAxis.plots; i++) {
-        ctx.beginPath();
-        ctx.setLineDash([1, 2]);
-        ctx.strokeStyle = config.yAxis.plotLine.color;
-        ctx.moveTo(x, y + (i * heightInterval));
-        ctx.lineTo(x + w, y + (i * heightInterval));
-        ctx.stroke();
-      }
-    }
+    if (config.xAxis.plotLine.display) drawXplot(ctx, xOptions);
+    if (config.yAxis.plotLine.display) drawYplot(ctx, yOptions);
 
     /**
-     * Tick labels
-     * TODO: Change demo to actual data;
+     * Tick labels: xAxis & yAxis
      */
-    if (config.xAxis.tick.display) {
-      let drawPlots = maxPlot / interval;
-      let widthInterval = w / drawPlots;
-      for (let i = 1; i < drawPlots; i++) {
-        ctx.restore();
-				ctx.textAlign = "left";
-        let time_value = moment.unix((startTime + (i * interval * 1000)) / 1000).format("HH:mm");
-        ctx.fillText(time_value, x + (i * widthInterval) - 12, y + h + 9);
-      }
-
-    }
-
-    if (config.yAxis.tick.display) {
-      let heightInterval = h / config.yAxis.plots;
-      let { maxValue } = config.yAxis;
-      let tickValue = maxValue;
-      for (let i = 0; i < config.yAxis.plots + 1; i++) {
-        ctx.textAlign = "right";
-        ctx.fillText(tickValue, x - 2, (y + 3) + (i * heightInterval));
-        tickValue -= (maxValue / (config.yAxis.plots));
-      }
-    }
+    if (config.xAxis.tick.display)     drawXtick(ctx, xOptions);
+    if (config.yAxis.tick.display)     drawYtick(ctx, yOptions);
 
     /**
      * Outer gridline & Tick labels
      */
-    if (config.xAxis.axisLine.display) {
-      ctx.beginPath();
-      ctx.strokeStyle = config.xAxis.axisLine.color;
-      ctx.moveTo(x, y + h);
-      ctx.lineTo(x + w, y + h);
-      ctx.stroke();
-    }
-    if (config.yAxis.axisLine.display) {
-      ctx.beginPath();
-      ctx.strokeStyle = config.yAxis.axisLine.color;
-      ctx.moveTo(x, y);
-      ctx.lineTo(x, y + h);
-      ctx.stroke();
-    }
+    if (config.xAxis.axisLine.display) drawXaxis(ctx, xOptions);
+    if (config.yAxis.axisLine.display) drawYaxis(ctx, yOptions);
   }
 
   /**
@@ -352,7 +365,7 @@ class LineChart extends WChart{
     let that = this;
     let ctx = this.ctx;
 		let startTime = this.startTime;
-		let endTime = this.endTime;
+    let endTime = this.endTime;
     const { x, y, w, h } = this.chartAttr;
     const { minValue, maxValue } = this.config.yAxis;
     
@@ -363,8 +376,11 @@ class LineChart extends WChart{
       let value = this.data.get(key);
 
       value.data.map((datum, idx) => {
-        if (datum[0] < this.startTime || datum[0] > this.endTime ) return;
-        let xPos = (datum[0] - this.startTime) / (this.endTime - this.startTime);
+        if (datum[0] < startTime || datum[0] > endTime ) return;
+        /**
+         * TODO: STARTTIME에 문제가 있음.
+         */
+        let xPos = (datum[0] - startTime) / (endTime - startTime);
         let xCoord = x + (w * xPos);
 
         let yPos = 1;
@@ -377,9 +393,6 @@ class LineChart extends WChart{
         }
         let yCoord = y + (h * yPos);
 
-        // ctx.fillStyle = "#333333";
-        // ctx.fillRect(xCoord, yCoord, 0.5, 0.5);
-
         /**
          * plot과 plot을 이어주는 line
          */
@@ -389,13 +402,6 @@ class LineChart extends WChart{
 					if (this.focused && this.focused.oid !== key) {
 						ctx.strokeStyle = "rgba(245,245,245,0.5)";
 					}
-					// if (this.focused && this.focused.oid === key) {
-					// 	ctx.save();
-					// 	ctx.textAlign = "left";
-					// 	ctx.fillText(`Currently Selected: ${value.oname}`, 100, 50);
-					// 	ctx.fillText(`Value: ${datum[1]}`, 100, 70);
-					// 	ctx.restore();
-					// }
           ctx.moveTo(xCoord, yCoord);
         } else {
           ctx.lineTo(xCoord, yCoord);
@@ -412,12 +418,13 @@ class LineChart extends WChart{
 				  x: xCoord,
 					y: yCoord,
 					r: 5,
-					offset: 2,
+          offset: 2,
+          time: datum[0],
 					value: datum[1]
 				})
       })
     }
-	this.dots = _dots;
+	  this.dots = _dots;
   }
 
   /**
@@ -433,11 +440,11 @@ class LineChart extends WChart{
   
 }
 
-const style = 'border: none; display: block; float: left; width: 12px; height: 12px; margin-right: 4px; margin-top: 3px;';
+const style = 'border: none; display: block; float: left; width: 6px; height: 6x; margin-right: 5px; margin-top: 0px;';
 
 function drawTooltipCircle(color, style) {
-  var circle = '<span style="' + style + '"><svg height="12" width="12">'
-  circle += '<circle cx="6" cy="6" r="6" fill="' + color + '" />'
+  var circle = '<span style="' + style + '"><svg height="8" width="8">'
+  circle += '<circle cx="4" cy="4" r="4" fill="' + color + '" />'
   circle += '</svg></span>'
   return circle
 }
