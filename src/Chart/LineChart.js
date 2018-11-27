@@ -55,6 +55,9 @@ const defaultOptions = {
       display: true,
       color: '#000000'
     }
+  },
+  common: {
+    disconnectThreshold: 20 * UNIX_TIMESTAMP
   }
 }
 
@@ -91,8 +94,8 @@ class LineChart extends WChart{
     this.initOptions(options);
     this.initCanvas();
 
-    this.palette = new Palette(colorId);
-    this.focused = undefined;
+    this.palette  = new Palette(colorId);
+    this.focused  = undefined;
     this.mediator = ChartMediator;
   }
 
@@ -103,12 +106,13 @@ class LineChart extends WChart{
   }
 
 	handleMouseMove = (evt) => {
-		let that = this;
-		let ctx = this.ctx;
-    let mousePos = getMousePos(this.wGetBoundingClientRect(), evt);
+		let that       = this;
+		let ctx        = this.ctx;
+    let mousePos   = getMousePos(this.wGetBoundingClientRect(), evt);
     let { mx, my } = mousePos;
-    let posX = evt.clientX;
-    let posY = evt.clientY;
+    let posX       = evt.clientX;
+    let posY       = evt.clientY;
+
 		if (this.tooltipOn) {
 			this.drawChart();
 		}
@@ -121,13 +125,6 @@ class LineChart extends WChart{
 			}
 		}
 		if (tooltipList.length !== 0) {
-			// ctx.textAlign = "left";
-			// ctx.font = "12px Verdana";
-			// ctx.fillStyle = "black";
-			// tooltipList.map((ttl, idx) => {
-			// 	let output = `${ttl.oname}: ${ttl.value.toFixed(1)}`;
-			// 	ctx.fillText(output, mx + 5, my + (idx * 10));
-			// });
 			let list = tooltipList.map((ttl, idx) => {
         let colorLabel = drawTooltipCircle(ttl.color, style);
         let tooltip = `<span>${colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}<br/></span>`;
@@ -179,9 +176,9 @@ class LineChart extends WChart{
 
   init = (bindId) => {
     this.chartId = bindId;
-    this.canvas = document.getElementById(bindId);
-    this.ctx = this.canvas.getContext("2d");
-    this.data = new LinkedMap();
+    this.canvas  = document.getElementById(bindId);
+    this.ctx     = this.canvas.getContext("2d");
+    this.data    = new LinkedMap();
 
     this.chartAttr = {
       x: 0,
@@ -194,11 +191,9 @@ class LineChart extends WChart{
   }
 
   initOptions = (options) => {
-    this.config = mergeDeep(defaultOptions, options);
-    console.log(this.config);
-
+    this.config    = mergeDeep(defaultOptions, options);
     this.startTime = this.config.xAxis.startTime;
-    this.endTime = this.config.xAxis.endTime;
+    this.endTime   = this.config.xAxis.endTime;
   }
 
   initCanvas = () => {
@@ -208,19 +203,20 @@ class LineChart extends WChart{
     this.canvas.addEventListener('click', this.handleMouseClick);
     this.canvas.addEventListener('mouseout', this.handleMouseOut);
 
-    let width = this.bcRect.width;
+    let width  = this.bcRect.width;
     let height = this.bcRect.height;
 
-    this.canvas.width = width * this.ratio;
-    this.canvas.height = height * this.ratio;
-    this.canvas.style.width = (width) + "px";
+    this.canvas.width        = width * this.ratio;
+    this.canvas.height       = height * this.ratio;
+    this.canvas.style.width  = (width) + "px";
     this.canvas.style.height = (height) + "px";
+
     this.ctx.scale(this.ratio, this.ratio);
   }
 
   loadData = (dataset) => {
     if (!dataset) return;
-    let that = this;
+    let that   = this;
     let config = this.config;
 
     dataset.map((ds, idx) => {
@@ -245,7 +241,6 @@ class LineChart extends WChart{
   }
 
   setTimeStandard = (data, idx) => {
-    console.log(data);
     if (idx === 0) {
       this.startTime = data[0][0];
       this.endTime = data[0][0];
@@ -288,7 +283,6 @@ class LineChart extends WChart{
 
       if (value.data.length > maxPlot) {
         let overflow = value.data.length - maxPlot;
-        console.log(overflow);
         value.data = value.data.slice(overflow);
         that.setTimeStandard(value.data, idx);
       }
@@ -312,11 +306,11 @@ class LineChart extends WChart{
    * @private
    */
   _drawBackground = () => {
-    let that = this;
-    let ctx = this.ctx;
-    let width = this.bcRect.width;
+    let that   = this;
+    let ctx    = this.ctx;
+    let width  = this.bcRect.width;
     let height = this.bcRect.height;
-    let plots = this.plots;
+    let plots  = this.plots;
     ctx.clearRect(0, 0, width, height);
 
     ctx.font = "8px Verdana";
@@ -339,13 +333,13 @@ class LineChart extends WChart{
    * @private
    */
   _drawAxis = () => {
-    let that = this;
-    let ctx = this.ctx;
-    let width = this.bcRect.width;
-    let height = this.bcRect.height;
-    let config = this.config;
+    let that      = this;
+    let ctx       = this.ctx;
+    let width     = this.bcRect.width;
+    let height    = this.bcRect.height;
+    let config    = this.config;
     let startTime = this.startTime;
-    let endTime = this.endTime;
+    let endTime   = this.endTime;
     let chartAttr = this.chartAttr;
     const { x, y, w, h } = chartAttr;
     const { interval, maxPlot, plotLine: xPlotLine, axisLine: xAxisLine } = config.xAxis;
@@ -384,18 +378,21 @@ class LineChart extends WChart{
    * @private
    */
   _drawData = () => {
-    let that = this;
-    let ctx = this.ctx;
+    let that      = this;
+    let ctx       = this.ctx;
 		let startTime = this.startTime;
-    let endTime = this.endTime;
-    const { x, y, w, h } = this.chartAttr;
-    const { minValue, maxValue } = this.config.yAxis;
+    let endTime   = this.endTime;
+
+    const { minValue, maxValue }  = this.config.yAxis;
+    const { disconnectThreshold } = this.config.common;
+    const { x, y, w, h }          = this.chartAttr;
     
 		let _dots = [];
     let en = this.data.keys();
     while(en.hasMoreElements()) {
       let key = en.nextElement();
       let value = this.data.get(key);
+      let prevTimestamp = 0;
 
       value.data.map((datum, idx) => {
         if (datum[0] < startTime || datum[0] > endTime ) return;
@@ -418,6 +415,8 @@ class LineChart extends WChart{
         /**
          * plot과 plot을 이어주는 line
          */
+        // ctx.save();
+
         if (idx === 0) {
           ctx.beginPath();
           ctx.strokeStyle = value.color;
@@ -426,9 +425,16 @@ class LineChart extends WChart{
 					}
           ctx.moveTo(xCoord, yCoord);
         } else {
-          ctx.lineTo(xCoord, yCoord);
-          ctx.stroke();
-
+          if (datum[0] - prevTimestamp < disconnectThreshold) {
+            ctx.lineTo(xCoord, yCoord);
+            ctx.stroke();
+          } else {
+            console.log("testing prevtimestamp");
+            console.log(prevTimestamp);
+            console.log(datum[0]);
+            ctx.closePath();
+          }
+          
           ctx.beginPath();
           ctx.moveTo(xCoord, yCoord);
         }
@@ -443,7 +449,9 @@ class LineChart extends WChart{
           offset: 2,
           time: datum[0],
 					value: datum[1]
-				})
+        })
+
+        prevTimestamp = datum[0];
       })
     }
 	  this.dots = _dots;

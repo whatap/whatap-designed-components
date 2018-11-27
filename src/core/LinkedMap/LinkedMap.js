@@ -308,7 +308,7 @@ class LinkedMap {
     }
     let tab = this.table;
     let index = this.hash(key) % tab.length;
-    for (let e = tab[index]; e !== null; e = e.next) {
+    for (let e = tab[index]; e !== null && typeof e !== 'undefined'; e = e.next) {
       if (e.key === key) {
         return true;
       }
