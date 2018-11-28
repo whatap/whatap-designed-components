@@ -16,6 +16,7 @@ class ChartMediator {
       throw new Error("Please provide an instance of WChart");
     }
   }
+
   unsubscribe = (chart) => {
     let charts = this.charts;
     let length = charts.length;
