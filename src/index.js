@@ -1,7 +1,9 @@
 import { ColorPicker } from './ColorPicker';
-import { Palette } from './Palette'
+import { Palette } from './Palette';
 import { HeapSort } from './core';
-import { Button } from './components'
-import { LineChart, ChartMediator, PublicLegend } from './Chart'
+import { Button } from './components';
+import { LineChart, ChartMediator, PublicLegend } from './Chart';
 
-export { ColorPicker, Palette, HeapSort, Button, LineChart, ChartMediator, PublicLegend };
+import { ChartWrapper } from './wrapper';
+
+export { ColorPicker, Palette, HeapSort, Button, LineChart, ChartMediator, PublicLegend, ChartWrapper };
