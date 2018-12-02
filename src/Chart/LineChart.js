@@ -3,102 +3,11 @@
  * created by MinGu Lee (@immigration9)
  * All rights reserved to WhaTap Labs 2018
  */
-import moment from 'moment';
 import WChart from './WChart';
-import { getMousePos  } from './helper/mouseEvt';
-
-import { createStyle, styleHidden, drawTooltipCircle } from './helper/drawTooltip';
-import ChartMediator from './mediator/ChartMediator';
 
 class LineChart extends WChart{
   constructor(bindId, colorId, options) {
     super(bindId, colorId, options);
-
-    this.initListener();
-
-    this.focused  = undefined;
-    this.mediator = ChartMediator;
-  }
-
-  notifyMediator = (action, arg) => {
-    if (typeof this.mediator[action] !== 'undefined') {
-      this.mediator[action](arg);
-    }
-  }
-
-  initListener = () => {
-    this.canvas.addEventListener('mousemove', this.handleMouseMove);
-    this.canvas.addEventListener('click', this.handleMouseClick);
-    this.canvas.addEventListener('mouseout', this.handleMouseOut);
-  }
-
-	handleMouseMove = (evt) => {
-		let that       = this;
-		let ctx        = this.ctx;
-    let mousePos   = getMousePos(this.overrideClientRect(), evt);
-    let { mx, my } = mousePos;
-    let posX       = evt.clientX;
-    let posY       = evt.clientY;
-
-		if (this.tooltipOn) {
-			this.drawChart();
-		}
-		this.tooltipOn = false;
-		let tooltipList = [];
-		for (let i = 0; i < this.dots.length; i++) {
-			let dot = this.dots[i];
-			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset) {
-				tooltipList.push(dot);
-			}
-		}
-		if (tooltipList.length !== 0) {
-			let list = tooltipList.map((ttl, idx) => {
-        let colorLabel = drawTooltipCircle(ttl.color);
-        let tooltip = `<span>${colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}<br/></span>`;
-        if (idx === 0) {
-          let timestamp = `<span>${moment.unix(ttl.time / 1000)}</span><br/>`
-          return timestamp + tooltip;
-        }
-				return tooltip;
-      });
-			this.tooltip.style.cssText = createStyle(mx, my);
-			this.tooltip.innerHTML = "";
-			list.map((ttl, idx) => {
-				that.tooltip.innerHTML += ttl;
-			});
-			this.tooltipOn = true;
-		} else {
-			this.tooltip.style.cssText = styleHidden();
-    }
-    
-    // notifyMediator("moved", data);
-	}
-
-	handleMouseClick = (evt) => {
-    let mousePos = getMousePos(this.overrideClientRect(), evt);
-		let { mx, my } = mousePos;
-    let max = this.dots.length;
-
-    let selectedDot;
-		for (let i = 0; i < max; i++) {
-			let dot = this.dots[i];
-			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset
-				&& dot.y > my - dot.offset && dot.y < my + dot.offset) {
-        selectedDot = dot;
-				break;
-			}
-		}
-    this.drawSelected(selectedDot);
-    this.notifyMediator("clicked", selectedDot);
-  }
-
-  handleMouseOut = (evt) => {
-    this.tooltip.style.cssText = styleHidden();
-  }
-
-  drawSelected = (dot) => {
-    this.focused = dot;
-    this.drawChart();
   }
 
   loadData = (dataset) => {
@@ -178,21 +87,11 @@ class LineChart extends WChart{
 
     this.drawChart();
   }
- 
-  resetData = () =>{
-    this.data.clear();
-  }
-
-  drawChart = () => {
-    this.drawPreBackground();
-    this._drawData();
-    this.drawPostBackground();
-  }
 
   /**
    * @private
    */
-  _drawData = () => {
+  drawData = () => {
     let that      = this;
     let ctx       = this.ctx;
 		let startTime = this.startTime;

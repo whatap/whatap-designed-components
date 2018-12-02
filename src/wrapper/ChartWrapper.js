@@ -73,6 +73,7 @@ class ChartWrapper extends Component{
 
   render() {
     const { id, showLegend } = this.props;
+    console.log(showLegend);
     return (
       <div ref={this.setDiv} style={{ width: '100%' }}>
         <canvas id={id}/>

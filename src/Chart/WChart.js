@@ -4,13 +4,28 @@ import { Palette } from '../Palette';
 import { LinkedMap, HeapSort } from '../core';
 import { drawXplot, drawYplot, drawXaxis, drawYaxis } from './helper/drawBorder';
 import { drawXtick, drawYtick } from './helper/drawTick';
+import Tooltip, { drawTooltipCircle } from './helper/drawTooltip';
+import moment from 'moment';
+import { getMousePos } from './helper/mouseEvt'
+import ChartMediator from './mediator/ChartMediator';
 
-export default class WChart {
+class WChart {
   constructor(bindId, colorId, options) {
     this.init(bindId, colorId);
     this.initOptions(options);
     this.initCanvas();
+
+    this.initListener();
     this.initUtils();
+
+    this.focused  = undefined;
+    this.mediator = ChartMediator;
+  }
+
+  notifyMediator = (action, arg) => {
+    if (typeof this.mediator[action] !== 'undefined') {
+      this.mediator[action](arg);
+    }
   }
 
   wGetBoundingClientRect = (element) => {
@@ -56,7 +71,6 @@ export default class WChart {
       h: 0,
     }
 		this.dots = [];
-		this.tooltipOn = false;
   }
 
   initOptions = (options) => {
@@ -80,8 +94,113 @@ export default class WChart {
     this.ctx.scale(this.ratio, this.ratio);
   }
 
+  initListener = () => {
+    this.tooltip = new Tooltip();
+    this.canvas.addEventListener("mouseover", this.handleMouseOver);
+    this.canvas.addEventListener("mousemove", this.handleMouseMove);
+    this.canvas.addEventListener("mouseout", this.handleMouseOut);
+    this.canvas.addEventListener("click", this.handleMouseClick);
+  }
+
+  handleMouseOver = (evt) => {
+    let mousePos = getMousePos(evt, this.overrideClientRect());
+    
+    let textOutput = this.findTooltipData(mousePos);
+
+    if (textOutput !== null) {
+      this.tooltip.append(evt, textOutput);
+    } else {
+      this.tooltip.remove();
+    }
+  }
+
+  handleMouseMove = (evt) => {
+    let mousePos = getMousePos(evt, this.overrideClientRect());
+
+    let textOutput = this.findTooltipData(mousePos);
+
+    if (textOutput !== null) {
+      if (this.tooltip.tooltipOn) {
+        this.tooltip.follow(evt, textOutput);
+      } else {
+        this.tooltip.append(evt, textOutput);
+      }
+    } else {
+      this.tooltip.remove();
+    }
+  }
+
+  handleMouseOut = (evt) => {
+    this.tooltip.remove();
+  }
+
+  handleMouseClick = (evt) => {
+    let mousePos = getMousePos(evt, this.overrideClientRect());
+		let { mx, my } = mousePos;
+    let max = this.dots.length;
+
+    let selectedDot;
+		for (let i = 0; i < max; i++) {
+			let dot = this.dots[i];
+			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset
+				&& dot.y > my - dot.offset && dot.y < my + dot.offset) {
+        selectedDot = dot;
+				break;
+			}
+		}
+    this.drawSelected(selectedDot);
+    this.notifyMediator("clicked", selectedDot);
+  }
+
+  findTooltipData = (pos) => {
+    const { mx, my } = pos;
+
+    let tooltipList = [];
+		for (let i = 0; i < this.dots.length; i++) {
+			let dot = this.dots[i];
+			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset) {
+				tooltipList.push(dot);
+			}
+		}
+		if (tooltipList.length !== 0) {
+			let list = tooltipList.map((ttl, idx) => {
+        let colorLabel = drawTooltipCircle(ttl.color);
+        let tooltip = `<span>${colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}<br/></span>`;
+        if (idx === 0) {
+          let timestamp = `<span>${moment.unix(ttl.time / 1000)}</span><br/>`
+          return timestamp + tooltip;
+        }
+				return tooltip;
+      });
+
+      let textOutput = "";
+			list.map((ttl, idx) => {
+				textOutput += ttl;
+      });
+      
+      return textOutput;
+		} else {
+      return null;
+    }
+  }
+
   initUtils = () => {
     this.heapSort = new HeapSort();
+  }
+
+  drawChart = () => {
+    this.drawPreBackground();
+    this.drawData();
+    this.drawPostBackground();
+  }
+
+  drawData = () => {
+    throw new Error("WChart cannot be instantiated. Please extend this class to utilize it");
+  }
+
+  drawSelected = (dot) => {
+    this.focused = dot;
+    this.drawChart();
   }
 
   drawPreBackground = () => {
@@ -91,7 +210,11 @@ export default class WChart {
 
   drawPostBackground = () => {
     this._drawAxis();
-    this._drawLabel();
+    // this._drawLabel();
+  }
+   
+  resetData = () =>{
+    this.data.clear();
   }
 
   /**
@@ -122,15 +245,11 @@ export default class WChart {
   }
 
   _drawPlot = () => {
-    let that      = this;
     let ctx       = this.ctx;
-    let width     = this.bcRect.width;
-    let height    = this.bcRect.height;
     let config    = this.config;
     let startTime = this.startTime;
     let endTime   = this.endTime;
     let chartAttr = this.chartAttr;
-    const { x, y, w, h } = chartAttr;
     const { interval, maxPlot, plotLine: xPlotLine, axisLine: xAxisLine } = config.xAxis;
     const { maxValue, minValue, plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
 
@@ -155,15 +274,11 @@ export default class WChart {
    * @private
    */
   _drawAxis = () => {
-    let that      = this;
     let ctx       = this.ctx;
-    let width     = this.bcRect.width;
-    let height    = this.bcRect.height;
     let config    = this.config;
     let startTime = this.startTime;
     let endTime   = this.endTime;
     let chartAttr = this.chartAttr;
-    const { x, y, w, h } = chartAttr;
     const { interval, maxPlot, plotLine: xPlotLine, axisLine: xAxisLine } = config.xAxis;
     const { maxValue, minValue, plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
 
@@ -196,16 +311,6 @@ export default class WChart {
     if (config.yAxis.axisLine.display) drawYaxis(ctx, yOptions);
   }
 
-  /**
-   * @private
-   */
-  _drawLabel = () => {
-		if (typeof this.tooltip === 'undefined') {
-			this.tooltip = document.createElement('div');
-			document.body.appendChild(this.tooltip);
-		}
-  }
-
   resizeCanvas = (element) => {
     this.bcRect = {
       ...this.bcRect,
@@ -230,3 +335,5 @@ export default class WChart {
   }
 
 }
+
+export default WChart;
