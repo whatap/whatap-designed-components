@@ -154,6 +154,7 @@ class WChart {
 
   findTooltipData = (pos) => {
     const { mx, my } = pos;
+    let ctx = this.ctx;
 
     let tooltipList = [];
 		for (let i = 0; i < this.dots.length; i++) {
@@ -163,20 +164,38 @@ class WChart {
 			}
 		}
 		if (tooltipList.length !== 0) {
-			let list = tooltipList.map((ttl, idx) => {
-        let colorLabel = drawTooltipCircle(ttl.color);
-        let tooltip = `<span>${colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}<br/></span>`;
-        if (idx === 0) {
-          let timestamp = `<span>${moment.unix(ttl.time / 1000)}</span><br/>`
-          return timestamp + tooltip;
-        }
-				return tooltip;
-      });
+      let maxTooltipWidth = 0;
+      let timestamp = `<div>${moment.unix(tooltipList[0].time / 1000)}</div>`;
 
-      let textOutput = "";
+      let list = tooltipList.map((ttl, idx) => {
+        let tooltipWidth = parseInt(ctx.measureText(`${ttl.oname}: ${ttl.value.toFixed(1)}`).width);
+        if (tooltipWidth > maxTooltipWidth) {
+          maxTooltipWidth = tooltipWidth;
+        }
+
+        return {
+          oname: ttl.oname,
+          value: ttl.value,
+          colorLabel: drawTooltipCircle(ttl.color),
+        }
+      })
+    
+      let listLength = list.length;
+      let listColumns = 1;
+      if (listLength >= 15) {
+        listColumns = Math.ceil(listLength / 15);
+      }
+      
+      let textOutput = "<div><div style='display: block'>";
+      textOutput += timestamp;
 			list.map((ttl, idx) => {
-				textOutput += ttl;
+        if (idx !== 0 && idx % listColumns === 0) {
+          textOutput += "</div><div style='display: block'>";
+        }
+        let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 80}px;'>${ttl.colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}</div>`;
+				textOutput += out;
       });
+      textOutput += "</div></div>";
       
       return textOutput;
 		} else {
