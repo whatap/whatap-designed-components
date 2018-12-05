@@ -4,8 +4,8 @@ const MINUTE_IN_SECONDS = 60;
 
 const defaultOptions = {
   xAxis: {
-    maxPlot: 60,
-    interval: 60,
+    maxPlot: 600, // 5 seconds interval for 10 minutes
+    interval: 5,
     axisLine: {
       display: true,
       color: '#000000',
@@ -27,8 +27,8 @@ const defaultOptions = {
       return d;
     },
     plots: 4,
-    maxValue: 100,
-    minValue: 0,
+    maxValue: 80,
+    minValue: 40,
     axisLine: {
       display: true,
       color: '#000000'

@@ -123,14 +123,18 @@ class LineChart extends WChart{
           } else {
             yPos = 1 - (datum[1] - minValue) / (maxValue - minValue);
           }
+        } else {
+          yPos = 0.99;
         }
         let yCoord = y + (h * yPos);
 
         /**
          * plot과 plot을 이어주는 line
          */
+        ctx.lineWidth = 1.5;
         if (idx === 0) {
           ctx.beginPath();
+          
           ctx.strokeStyle = value.color;
 					if (this.focused && this.focused.oid !== key) {
 						ctx.strokeStyle = "rgba(245,245,245,0.5)";

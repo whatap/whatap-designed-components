@@ -48,7 +48,7 @@ export default class HeapSort {
     let left = 2 * i + 1;
     let right = 2 * i + 2;
 
-    if (item) {
+    if (item || item === 0) {
       let leftItem = arr[left];
       let rightItem = arr[right];
       let largestItem = arr[largest];

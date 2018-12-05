@@ -33,7 +33,7 @@ export function drawYtick (ctx, args) {
   for (let i = 0; i < plots + 1; i++) {
     ctx.textAlign = "right";
     ctx.fillText(tickValue, x - 2, ( y + 3 ) + (i * heightInterval));
-    tickValue -= (maxValue / plots);
+    tickValue -= ((maxValue - minValue) / plots);
   }
   ctx.restore();
 }
