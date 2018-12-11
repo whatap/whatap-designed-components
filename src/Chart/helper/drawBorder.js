@@ -26,10 +26,9 @@ export function drawXplot (ctx, args) {
 
 export function drawYplot (ctx, args) {
   let options = args;
-  let { chartAttr, plots, maxValue, minValue, yPlotLine } = options;
+  let { chartAttr, plots, yPlotLine } = options;
   let { x, y, w, h } = chartAttr;
   let heightInterval = h / plots;
-  let tickValue = maxValue;
 
   ctx.save();
   for (let i = 0; i < plots + 1; i++) {

@@ -38,7 +38,7 @@ export function drawTooltipCircle(color, style=style) {
 class Tooltip {
   constructor() {
     this.tooltipEl = document.createElement('div');
-    this.tooltipEl.className = 'tooltip';
+    this.tooltipEl.className = 'whatap-tooltip';
     this.tooltipEl.style.position = 'absolute';
 
     this.tooltipOn = false;

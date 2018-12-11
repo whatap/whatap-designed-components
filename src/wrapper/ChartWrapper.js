@@ -9,7 +9,8 @@ import { ChartCollection } from '../Chart'
 // }
 // ChartWrapper.defaultProps = {
 //   type: 'LineChart',
-//   showLegend: false
+//   showLegend: false,
+//   options: {}
 // }
 
 function objectCompare (object1, object2) {
@@ -29,9 +30,9 @@ class ChartWrapper extends Component{
 
   componentDidMount() {
     let that = this;
-    const { type, id, colorId, mediator } = this.props;
+    const { type, id, colorId, mediator, options } = this.props;
 
-    this.chart = new ChartCollection[type](id, colorId);
+    this.chart = new ChartCollection[type](id, colorId, options);
     
     if ( mediator ) {
       console.log(mediator);
@@ -49,16 +50,15 @@ class ChartWrapper extends Component{
   }
 
   componentWillReceiveProps(nextProps) {
+    const { dataId } = this.props;
     if (typeof nextProps.data !== 'undefined'
     && !objectCompare(this.props.data, nextProps.data)) {
-      console.log("으잉?")
-      this.chart.loadData(nextProps.data);
+      this.chart.loadData(nextProps.data, dataId);
     }
     if (typeof nextProps.updateData !== 'undefined' 
     && nextProps.updateData.length > 0
     && !objectCompare(this.props.updateData, nextProps.updateData)) {
-      console.log(nextProps.updateData);
-      this.chart.updateData(nextProps.updateData);
+      this.chart.updateData(nextProps.updateData, dataId);
     }
   }
 
@@ -73,9 +73,9 @@ class ChartWrapper extends Component{
 
   render() {
     const { id, showLegend } = this.props;
-    console.log(showLegend);
+    
     return (
-      <div ref={this.setDiv} style={{ width: '100%' }}>
+      <div ref={this.setDiv} style={{ width: '100%', height: '100%' }}>
         <canvas id={id}/>
         { showLegend 
         ? <div>

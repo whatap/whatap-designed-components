@@ -4,8 +4,7 @@ const MINUTE_IN_SECONDS = 60;
 
 const defaultOptions = {
   xAxis: {
-    maxPlot: 600, // 5 seconds interval for 10 minutes
-    interval: 5,
+    // maxPlot: 120, // 5 seconds interval for 10 minutes
     axisLine: {
       display: true,
       color: '#000000',
@@ -15,7 +14,7 @@ const defaultOptions = {
       color: '#d9e2eb'
     },
     tick: {
-      display: true,
+      display: false,
       color: '#000000'
     },
     isFixed: false,
@@ -27,8 +26,9 @@ const defaultOptions = {
       return d;
     },
     plots: 4,
-    maxValue: 80,
-    minValue: 40,
+    maxValue: 100,
+    minValue: 0,
+    fixedMinMax: true,
     axisLine: {
       display: true,
       color: '#000000'
@@ -38,7 +38,7 @@ const defaultOptions = {
       color: '#d9e2eb'
     },
     tick: {
-      display: true,
+      display: false,
       color: '#000000'
     }
   },

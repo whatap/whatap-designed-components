@@ -168,7 +168,12 @@ class WChart {
       let timestamp = `<div>${moment.unix(tooltipList[0].time / 1000)}</div>`;
 
       let list = tooltipList.map((ttl, idx) => {
-        let tooltipWidth = parseInt(ctx.measureText(`${ttl.oname}: ${ttl.value.toFixed(1)}`).width);
+        let tooltipWidth = 0;
+        if (ttl.oname) {
+          tooltipWidth = parseInt(ctx.measureText(`${ttl.oname}: ${ttl.value.toFixed(1)}`).width);
+        } else {
+          tooltipWidth = parseInt(ctx.measureText(`${ttl.value.toFixed(1)}`).width);
+        }
         if (tooltipWidth > maxTooltipWidth) {
           maxTooltipWidth = tooltipWidth;
         }
@@ -192,7 +197,7 @@ class WChart {
         if (idx !== 0 && idx % listColumns === 0) {
           textOutput += "</div><div style='display: block'>";
         }
-        let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 80}px;'>${ttl.colorLabel} ${ttl.oname}: ${ttl.value.toFixed(1)}</div>`;
+        let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 80}px;'>${ttl.colorLabel} ${ttl.oname ? ttl.oname + ': ' : ''}${ttl.value.toFixed(1)}</div>`;
 				textOutput += out;
       });
       textOutput += "</div></div>";
@@ -245,16 +250,17 @@ class WChart {
     let width  = this.bcRect.width;
     let height = this.bcRect.height;
     let plots  = this.plots;
+    let config = this.config;
     ctx.clearRect(0, 0, width, height);
 
     ctx.font = "8px Verdana";
     ctx.save();
 
     let yAxisMax = this.config.yAxis.tickFormat(this.config.yAxis.maxValue);
-    this.chartAttr.x = parseInt(ctx.measureText(yAxisMax).width) + 5;
-    this.chartAttr.y = 5;
+    this.chartAttr.x = (config.xAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + 5 : 2;
+    this.chartAttr.y = (config.yAxis.tick.display) ? 25 : 5;
     this.chartAttr.w = width - this.chartAttr.x;
-    this.chartAttr.h = height - this.chartAttr.y - 20;
+    this.chartAttr.h = height - this.chartAttr.y;
     
     ctx.fillStyle = "rgba(0,0,0,0)";
     ctx.fillRect(0, 0, width, height);
@@ -275,11 +281,17 @@ class WChart {
     const xOptions = {
       format: "HH:mm:ss",
       minOffset: 3,
-      chartAttr, startTime, endTime, xPlotLine, xAxisLine
+      chartAttr, 
+      startTime, 
+      endTime, 
+      xPlotLine, 
+      xAxisLine
     }
     const yOptions = { 
-      chartAttr, maxValue, minValue, yPlotLine, yAxisLine,
-      plots: config.yAxis.plots
+      plots: config.yAxis.plots,
+      chartAttr, 
+      yPlotLine, 
+      yAxisLine,
     } 
 
     /**
