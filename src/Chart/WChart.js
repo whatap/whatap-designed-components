@@ -8,7 +8,7 @@ import Tooltip, { drawTooltipCircle } from './helper/drawTooltip';
 import moment from 'moment';
 import { getMousePos } from './helper/mouseEvt'
 import ChartMediator from './mediator/ChartMediator';
-import { ttCalcX } from './util/tooltipCalc';
+import { ttCalcX, ttRange } from './util/tooltipCalc';
 
 class WChart {
   constructor(bindId, colorId, options) {
@@ -142,11 +142,24 @@ class WChart {
     let mousePos = getMousePos(evt, this.overrideClientRect());
 		let { mx, my } = mousePos;
     let max = this.dots.length;
+    let startTime = this.startTime;
+    let endTime   = this.endTime;
+    let xStart    = this.chartAttr.x;
+    let xEnd      = this.chartAttr.x + this.chartAttr.w;
+
+    let timeValue = ttCalcX(startTime, endTime, xStart, xEnd, mx);
+    console.log(timeValue);
+
+    let clickRange = 1000;
+    if (this.dots.length > 1) {
+      clickRange = ttRange(this.dots);
+    }
+    console.log(clickRange);
 
     let selectedDot;
 		for (let i = 0; i < max; i++) {
 			let dot = this.dots[i];
-			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset
+			if (dot.time > timeValue - (clickRange / 2) && dot.time < timeValue + (clickRange / 2)
 				&& dot.y > my - dot.offset && dot.y < my + dot.offset) {
         selectedDot = dot;
 				break;

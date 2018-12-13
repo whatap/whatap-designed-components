@@ -4,7 +4,8 @@
  * All rights reserved to WhaTap Labs 2018
  */
 import WChart from './WChart';
-import { ttCalcX } from './util/tooltipCalc'
+import moment from 'moment';
+import { ttCalcX, ttRange } from './util/tooltipCalc'
 import { drawTooltipCircle } from './helper/drawTooltip';
 
 class LineChart extends WChart{
@@ -66,7 +67,6 @@ class LineChart extends WChart{
         }
         
       })
-  
     }
     
     this.drawChart();
@@ -74,6 +74,7 @@ class LineChart extends WChart{
 
   findTooltipData = (pos) => {
     const { mx, my } = pos;
+    let that      = this;
     let ctx       = this.ctx;
     let startTime = this.startTime;
     let endTime   = this.endTime;
@@ -84,17 +85,7 @@ class LineChart extends WChart{
 
     let tooltipRange = 1000;
     if (this.dots.length > 1) {
-      let minimumTtRange = this.dots[1].time - this.dots[0].time;
-
-      for (let i = 2; i < this.dots.length; i++) {
-        let currentTtRange = this.dots[i].time - this.dots[i - 1].time;
-
-        if (currentTtRange < minimumTtRange) {
-          minimumTtRange = currentTtRange;
-        }
-      }
-
-      tooltipRange = minimumTtRange;
+      tooltipRange = ttRange(this.dots);
     }
 
     let tooltipList = [];
@@ -103,11 +94,18 @@ class LineChart extends WChart{
       if (dot.time > timeValue - (tooltipRange / 2) && dot.time < timeValue + (tooltipRange / 2)) {
         tooltipList.push(dot);
       }
-      
-		}
+    }
+    
+    if (this.focused) {
+      let currentDot = tooltipList.find((el) => {
+        return that.focused.oid === el.oid
+      })
+      tooltipList = [currentDot];
+    }
+
 		if (tooltipList.length !== 0) {
       let maxTooltipWidth = 0;
-      let timestamp = `<div>${moment.unix(tooltipList[0].time / 1000)}</div>`;
+      let timestamp = `<div>${moment.unix(tooltipList[0].time / 1000).format("YYYY-MM-DD HH:mm:ss")}</div>`;
 
       let list = tooltipList.map((ttl, idx) => {
         let tooltipWidth = 0;
@@ -282,7 +280,7 @@ class LineChart extends WChart{
 				  x: xCoord,
 					y: yCoord,
 					r: 5,
-          offset: 1,
+          offset: 3,
           time: datum[0],
 					value: datum[1]
         })
