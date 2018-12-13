@@ -8,6 +8,7 @@ import Tooltip, { drawTooltipCircle } from './helper/drawTooltip';
 import moment from 'moment';
 import { getMousePos } from './helper/mouseEvt'
 import ChartMediator from './mediator/ChartMediator';
+import { ttCalcX } from './util/tooltipCalc';
 
 class WChart {
   constructor(bindId, colorId, options) {
@@ -108,9 +109,8 @@ class WChart {
     let textOutput = this.findTooltipData(mousePos);
 
     if (textOutput !== null) {
+      this.mouseFollow = true;
       this.tooltip.append(evt, textOutput);
-    } else {
-      this.tooltip.remove();
     }
   }
 
@@ -120,17 +120,21 @@ class WChart {
     let textOutput = this.findTooltipData(mousePos);
 
     if (textOutput !== null) {
+      this.mouseFollow = true;
       if (this.tooltip.tooltipOn) {
         this.tooltip.follow(evt, textOutput);
       } else {
         this.tooltip.append(evt, textOutput);
       }
     } else {
-      this.tooltip.remove();
+      if (!this.mouseFollow) {
+        this.tooltip.remove();
+      }
     }
   }
 
   handleMouseOut = (evt) => {
+    this.mouseFollow = false;
     this.tooltip.remove();
   }
 
@@ -153,59 +157,7 @@ class WChart {
   }
 
   findTooltipData = (pos) => {
-    const { mx, my } = pos;
-    let ctx = this.ctx;
-
-    let tooltipList = [];
-		for (let i = 0; i < this.dots.length; i++) {
-			let dot = this.dots[i];
-			if (dot.x > mx - dot.offset && dot.x < mx + dot.offset) {
-				tooltipList.push(dot);
-			}
-		}
-		if (tooltipList.length !== 0) {
-      let maxTooltipWidth = 0;
-      let timestamp = `<div>${moment.unix(tooltipList[0].time / 1000)}</div>`;
-
-      let list = tooltipList.map((ttl, idx) => {
-        let tooltipWidth = 0;
-        if (ttl.oname) {
-          tooltipWidth = parseInt(ctx.measureText(`${ttl.oname}: ${ttl.value.toFixed(1)}`).width);
-        } else {
-          tooltipWidth = parseInt(ctx.measureText(`${ttl.value.toFixed(1)}`).width);
-        }
-        if (tooltipWidth > maxTooltipWidth) {
-          maxTooltipWidth = tooltipWidth;
-        }
-
-        return {
-          oname: ttl.oname,
-          value: ttl.value,
-          colorLabel: drawTooltipCircle(ttl.color),
-        }
-      })
-    
-      let listLength = list.length;
-      let listColumns = 1;
-      if (listLength >= 15) {
-        listColumns = Math.ceil(listLength / 15);
-      }
-      
-      let textOutput = "<div><div style='display: block'>";
-      textOutput += timestamp;
-			list.map((ttl, idx) => {
-        if (idx !== 0 && idx % listColumns === 0) {
-          textOutput += "</div><div style='display: block'>";
-        }
-        let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 80}px;'>${ttl.colorLabel} ${ttl.oname ? ttl.oname + ': ' : ''}${ttl.value.toFixed(1)}</div>`;
-				textOutput += out;
-      });
-      textOutput += "</div></div>";
-      
-      return textOutput;
-		} else {
-      return null;
-    }
+    throw new Error("WChart cannot be instantiated. Please extend this class to utilize it");
   }
 
   initUtils = () => {
@@ -257,10 +209,10 @@ class WChart {
     ctx.save();
 
     let yAxisMax = this.config.yAxis.tickFormat(this.config.yAxis.maxValue);
-    this.chartAttr.x = (config.xAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + 5 : 2;
-    this.chartAttr.y = (config.yAxis.tick.display) ? 25 : 5;
+    this.chartAttr.x = (config.yAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + 5 : 2;
+    this.chartAttr.y = (config.xAxis.tick.display) ? 25 : 5;
     this.chartAttr.w = width - this.chartAttr.x;
-    this.chartAttr.h = height - this.chartAttr.y;
+    this.chartAttr.h = (config.xAxis.tick.display) ? height - this.chartAttr.y - 20 : height - this.chartAttr.y - 5;
     
     ctx.fillStyle = "rgba(0,0,0,0)";
     ctx.fillRect(0, 0, width, height);
@@ -343,10 +295,22 @@ class WChart {
   }
 
   resizeCanvas = (element) => {
+    if (!element) {
+      element = this.overrideClientRect();
+    }
     this.bcRect = {
       ...this.bcRect,
-      width: element.clientWidth - 10,
+      width: element.clientWidth,
       height: element.clientHeight,
+    }
+
+    this.setDpiSupport();
+  }
+
+  resizeCanvasWithSize = (width, height) => {
+    this.bcRect = {
+      width: width,
+      height: height
     }
 
     this.setDpiSupport();

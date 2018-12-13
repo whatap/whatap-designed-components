@@ -14,7 +14,7 @@ const defaultOptions = {
       color: '#d9e2eb'
     },
     tick: {
-      display: false,
+      display: true,
       color: '#000000'
     },
     isFixed: false,
@@ -38,12 +38,15 @@ const defaultOptions = {
       color: '#d9e2eb'
     },
     tick: {
-      display: false,
+      display: true,
       color: '#000000'
     }
   },
+  tooltip: {
+    range: 1000
+  },
   common: {
-    disconnectThreshold: 20 * UNIX_TIMESTAMP
+    disconnectThreshold: 20 * UNIX_TIMESTAMP * 10000000
   }
 }
 

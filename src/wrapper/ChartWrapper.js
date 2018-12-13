@@ -26,6 +26,11 @@ class ChartWrapper extends Component{
     this.setDiv = element => {
       this.mainDiv = element;
     }
+
+    this.setCanvas = element => {
+      this.canvasRef = element;
+    }
+
   }
 
   componentDidMount() {
@@ -35,7 +40,6 @@ class ChartWrapper extends Component{
     this.chart = new ChartCollection[type](id, colorId, options);
     
     if ( mediator ) {
-      console.log(mediator);
       mediator.subscribe(this.chart);
     }
     
@@ -44,7 +48,22 @@ class ChartWrapper extends Component{
     }
     
     window.addEventListener("resize", that.resizeCanvas, false);
-    this.resizeCanvas();
+    setTimeout(() => {
+      that.resizeCanvas();
+    }, 100);
+
+    this.chartInitSizing = setInterval(() => {
+      try {
+        if (that.mainDiv.clientWidth !== that.canvasRef.clientWidth) {
+          that.resizeCanvas();
+        } else {
+          clearInterval(that.chartInitSizing);
+        }
+      } catch (e) {
+        console.log("Resizing error");
+        clearInterval(that.chartInitSizing);
+      } 
+    }, 100);
     
     this.chart.drawChart();
   }
@@ -60,28 +79,27 @@ class ChartWrapper extends Component{
     && !objectCompare(this.props.updateData, nextProps.updateData)) {
       this.chart.updateData(nextProps.updateData, dataId);
     }
+
   }
 
-  // shouldComponentUpdate(nextProps) {
-
-  // }
-
   resizeCanvas = () => {
+    // this.chart.resizeCanvasWithSize(size.width, size.height);
     this.chart.resizeCanvas(this.mainDiv);
     this.chart.drawChart();
   }
 
   render() {
-    const { id, showLegend } = this.props;
+    let that = this;
+    const { id, showLegend, cvHeight, cvWidth } = this.props;
     
     return (
-      <div ref={this.setDiv} style={{ width: '100%', height: '100%' }}>
-        <canvas id={id}/>
-        { showLegend 
-        ? <div>
-            Hello, World!
-          </div>
-        : undefined}
+      <div ref={that.setDiv}>
+        <canvas ref={that.setCanvas} id={id} style={{ width: cvWidth || "100%", height: cvHeight || "300px" }}/>
+          {/* { showLegend 
+          ? <div>
+              Hello, World!
+            </div>
+          : undefined} */}
       </div>
     )
   }

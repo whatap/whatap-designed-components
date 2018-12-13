@@ -4,6 +4,8 @@
  * All rights reserved to WhaTap Labs 2018
  */
 import WChart from './WChart';
+import { ttCalcX } from './util/tooltipCalc'
+import { drawTooltipCircle } from './helper/drawTooltip';
 
 class LineChart extends WChart{
   constructor(bindId, colorId, options) {
@@ -24,47 +26,130 @@ class LineChart extends WChart{
 
     let maxPlotCnt = 0;
 
-    dataset.map((ds, idx) => {
-      let colorValue = that.palette.getColorFromOid(ds.oid);
-
-      /**
-       * Sorts the inner data in ascending order.
-       */
-      that.heapSort.sort(ds[dataId], false, 0);
-
-      /**
-       * If not fixed Minimum / Maximum value, evaluate the data within and decide the max/min value
-       */
-      if (!fixedMinMax) {
-        ds[dataId].map((data) => {
-          if (data[1] > that.maxValue ) {
-            that.maxValue = data[1];
-          } else if (data[1] < that.minValue) {
-            that.minValue = data[1];
-          }
-        })
-      }
-
-      if (ds[dataId].length > maxPlotCnt) {
-        maxPlotCnt = ds[dataId].length;
-      }
-
-      that.data.put(ds.oid, { oname: ds.oname, data: ds[dataId], color: colorValue });
-      /**
-       * Only get the initial start time when the option is set to `isFixed=false`
-       */
-      if (!config.xAxis.isFixed) {
-        that.setTimeStandard(ds[dataId], idx);
-      }
-
-      if (typeof this.maxPlots === 'undefined') {
-        this.maxPlots = maxPlotCnt;
-      }
-      
-    })
-
+    if (dataset.length > 0) {
+      this.data.clear();
+      dataset.map((ds, idx) => {
+        let colorValue = that.palette.getColorFromOid(ds.oid);
+  
+        /**
+         * Sorts the inner data in ascending order.
+         */
+        that.heapSort.sort(ds[dataId], false, 0);
+  
+        /**
+         * If not fixed Minimum / Maximum value, evaluate the data within and decide the max/min value
+         */
+        if (!fixedMinMax) {
+          ds[dataId].map((data) => {
+            if (data[1] > that.maxValue ) {
+              that.maxValue = data[1];
+            } else if (data[1] < that.minValue) {
+              that.minValue = data[1];
+            }
+          })
+        }
+  
+        if (ds[dataId].length > maxPlotCnt) {
+          maxPlotCnt = ds[dataId].length;
+        }
+  
+        that.data.put(ds.oid, { oname: ds.oname, data: ds[dataId], color: colorValue });
+        /**
+         * Only get the initial start time when the option is set to `isFixed=false`
+         */
+        if (!config.xAxis.isFixed) {
+          that.setTimeStandard(ds[dataId], idx);
+        }
+  
+        if (typeof this.maxPlots === 'undefined') {
+          this.maxPlots = maxPlotCnt;
+        }
+        
+      })
+  
+    }
+    
     this.drawChart();
   }
+
+  findTooltipData = (pos) => {
+    const { mx, my } = pos;
+    let ctx       = this.ctx;
+    let startTime = this.startTime;
+    let endTime   = this.endTime;
+    let xStart    = this.chartAttr.x;
+    let xEnd      = this.chartAttr.x + this.chartAttr.w;
+
+    let timeValue = ttCalcX(startTime, endTime, xStart, xEnd, mx);
+
+    let tooltipRange = 1000;
+    if (this.dots.length > 1) {
+      let minimumTtRange = this.dots[1].time - this.dots[0].time;
+
+      for (let i = 2; i < this.dots.length; i++) {
+        let currentTtRange = this.dots[i].time - this.dots[i - 1].time;
+
+        if (currentTtRange < minimumTtRange) {
+          minimumTtRange = currentTtRange;
+        }
+      }
+
+      tooltipRange = minimumTtRange;
+    }
+
+    let tooltipList = [];
+		for (let i = 0; i < this.dots.length; i++) {
+			let dot = this.dots[i];
+      if (dot.time > timeValue - (tooltipRange / 2) && dot.time < timeValue + (tooltipRange / 2)) {
+        tooltipList.push(dot);
+      }
+      
+		}
+		if (tooltipList.length !== 0) {
+      let maxTooltipWidth = 0;
+      let timestamp = `<div>${moment.unix(tooltipList[0].time / 1000)}</div>`;
+
+      let list = tooltipList.map((ttl, idx) => {
+        let tooltipWidth = 0;
+        if (ttl.oname) {
+          tooltipWidth = parseInt(ctx.measureText(`${ttl.oname}: ${ttl.value.toFixed(1)}`).width);
+        } else {
+          tooltipWidth = parseInt(ctx.measureText(`${ttl.value.toFixed(1)}`).width);
+        }
+        if (tooltipWidth > maxTooltipWidth) {
+          maxTooltipWidth = tooltipWidth;
+        }
+
+        return {
+          oname: ttl.oname,
+          value: ttl.value,
+          colorLabel: drawTooltipCircle(ttl.color),
+        }
+      })
+    
+      let listLength = list.length;
+      let listColumns = 1;
+      if (listLength >= 15) {
+        listColumns = Math.ceil(listLength / 15);
+      }
+      
+      let textOutput = "<div><div style='display: block'>";
+      textOutput += timestamp;
+			list.map((ttl, idx) => {
+        if (idx !== 0 && idx % listColumns === 0) {
+          textOutput += "</div><div style='display: block'>";
+        }
+        let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 80}px;'>${ttl.colorLabel} ${ttl.oname ? ttl.oname + ': ' : ''}${ttl.value.toFixed(1)}</div>`;
+				textOutput += out;
+      });
+      textOutput += "</div></div>";
+      
+      return textOutput;
+		} else {
+      return null;
+    }
+  }
+
 
   setTimeStandard = (data, idx) => {
     if (idx === 0) {
@@ -84,7 +169,6 @@ class LineChart extends WChart{
   }
 
   updateData = (dataset, dataId = "data") => {
-    console.log(dataset);
     if (!dataset) return;
     let that   = this;
     let config = this.config;
