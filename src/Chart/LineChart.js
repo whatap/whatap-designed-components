@@ -17,7 +17,7 @@ class LineChart extends WChart{
     if (!dataset) return;
     let that      = this;
     let config    = this.config;
-    this.maxPlots = config.xAxis.maxPlot;
+    this.maxPlot = config.xAxis.maxPlot;
     const { minValue, maxValue, fixedMinMax }  = config.yAxis;
     
     if (fixedMinMax) {
@@ -62,8 +62,8 @@ class LineChart extends WChart{
           that.setTimeStandard(ds[dataId], idx);
         }
   
-        if (typeof this.maxPlots === 'undefined') {
-          this.maxPlots = maxPlotCnt;
+        if (typeof this.maxPlot === 'undefined') {
+          this.maxPlot = maxPlotCnt;
         }
         
       })
@@ -176,7 +176,34 @@ class LineChart extends WChart{
       if (that.data.containsKey(ds.oid)) {
         let cData = that.data.get(ds.oid);
         ds[dataId].map((datum) => {
-          cData.data.push(datum);
+          /**
+           * `config.common.identicalDataBehavior`
+           * 실시간 데이터의 경우, 데이터 생성이 완료되기 전에 API Call로 인해서 data가 수신되었을 수 있다.
+           * 이 경우, 이 후에 나머지 데이터가 전송되는 경우, 보간할 것인지 (sum / avg) 혹은 대체할 것인지 (replace)
+           * 아니면 중복시킬 것인지(권장되지 않음)를 결정한다.
+           */
+          let hasData = cData.data.find((d) => {
+            return datum[0] === d[0];
+          })
+
+          if (typeof hasData !== 'undefined') {
+            switch(config.common.identicalDataBehavior) {
+              case "avg":
+                hasData[1] = (hasData[1] + datum[1]) / 2;
+                break;
+              case "sum":
+                hasData[1] += datum[1];
+                break;
+              case "replace":
+                hasData[1] = datum[1];
+              case "none":
+              default:
+                cData.data.push(datum);
+                break;
+            }
+          } else {
+            cData.data.push(datum);
+          }
           
           if (!fixedMinMax) {
             if (datum[1] > that.maxValue ) {

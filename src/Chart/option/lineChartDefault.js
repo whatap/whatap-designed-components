@@ -46,7 +46,8 @@ const defaultOptions = {
     range: 1000
   },
   common: {
-    disconnectThreshold: 20 * UNIX_TIMESTAMP * 10000000
+    disconnectThreshold: 20 * UNIX_TIMESTAMP * 10000000,
+    identicalDataBehavior: "avg"
   }
 }
 
