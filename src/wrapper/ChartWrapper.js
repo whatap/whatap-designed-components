@@ -93,7 +93,7 @@ class ChartWrapper extends Component{
     const { id, showLegend, cvHeight, cvWidth } = this.props;
     
     return (
-      <div ref={that.setDiv} style={{ width: "100%", height: "100%" }} >
+      <div ref={that.setDiv} style={{ width: "100%", height: "100%"}} >
         <canvas ref={that.setCanvas} id={id} style={{ width: cvWidth || "100%", height: cvHeight || "100%" }}/>
           {/* { showLegend 
           ? <div>
