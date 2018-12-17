@@ -9,6 +9,7 @@ import moment from 'moment';
 import { getMousePos } from './helper/mouseEvt'
 import ChartMediator from './mediator/ChartMediator';
 import { ttCalcX, ttRange } from './util/positionCalc';
+import { calculateFormat } from './meta/plotMeta';
 
 class WChart {
   constructor(bindId, colorId, options) {
@@ -218,13 +219,13 @@ class WChart {
     let config = this.config;
     ctx.clearRect(0, 0, width, height);
 
-    ctx.font = "8px Verdana";
+    ctx.font = "10px Verdana";
     ctx.save();
 
-    let yAxisMax = this.config.yAxis.tickFormat(this.config.yAxis.maxValue);
+    let yAxisMax = this.config.yAxis.tick.format(config.yAxis.maxValue);
     this.chartAttr.x = (config.yAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + 5 : 2;
-    this.chartAttr.y = (config.xAxis.tick.display) ? 25 : 5;
-    this.chartAttr.w = width - this.chartAttr.x;
+    this.chartAttr.y = (config.xAxis.tick.display) ? 5 : 5;
+    this.chartAttr.w = width - this.chartAttr.x - config.common.offset.right;
     this.chartAttr.h = (config.xAxis.tick.display) ? height - this.chartAttr.y - 20 : height - this.chartAttr.y - 5;
     
     ctx.fillStyle = "rgba(0,0,0,0)";
@@ -235,16 +236,19 @@ class WChart {
   }
 
   _drawPlot = () => {
-    let ctx       = this.ctx;
-    let config    = this.config;
-    let startTime = this.startTime;
-    let endTime   = this.endTime;
-    let chartAttr = this.chartAttr;
+    let ctx         = this.ctx;
+    let config      = this.config;
+    let startTime   = this.startTime;
+    let endTime     = this.endTime;
+    let chartAttr   = this.chartAttr;
+    let xAxisFormat = config.xAxis.tick.format;
+    let yAxisFormat = config.yAxis.tick.format;
+    let diff        = startTime - endTime;
     const { interval, maxPlot, plotLine: xPlotLine, axisLine: xAxisLine } = config.xAxis;
     const { maxValue, minValue, plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
 
     const xOptions = {
-      format: "HH:mm:ss",
+      format: xAxisFormat || calculateFormat(diff),
       minOffset: 3,
       chartAttr, 
       startTime, 
@@ -270,20 +274,24 @@ class WChart {
    * @private
    */
   _drawAxis = () => {
-    let ctx       = this.ctx;
-    let config    = this.config;
-    let startTime = this.startTime;
-    let endTime   = this.endTime;
-    let chartAttr = this.chartAttr;
+    let ctx         = this.ctx;
+    let config      = this.config;
+    let startTime   = this.startTime;
+    let endTime     = this.endTime;
+    let chartAttr   = this.chartAttr;
+    let xAxisFormat = config.xAxis.tick.format;
+    let yAxisFormat = config.yAxis.tick.format;
+    let diff        = startTime - endTime;
     const { interval, maxPlot, plotLine: xPlotLine, axisLine: xAxisLine } = config.xAxis;
     const { maxValue, minValue, plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
 
     const xOptions = {
-      format: "HH:mm:ss",
+      format: xAxisFormat || calculateFormat(diff),
       minOffset: 3,
       chartAttr, startTime, endTime, xPlotLine, xAxisLine
     }
     const yOptions = { 
+      format: yAxisFormat,
       chartAttr, maxValue, minValue, yPlotLine, yAxisLine,
       plots: config.yAxis.plots
     } 

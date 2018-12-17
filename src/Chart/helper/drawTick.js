@@ -2,10 +2,21 @@ import moment from 'moment';
 import calculateDiff from '../meta/plotMeta'
 import { timeToPos } from '../util/positionCalc';
 
+const UNIX_TIMESTAMP = 1000;
 
 export function drawXtick (ctx, args) {
   let options = args;
-  let textWidth = ctx.measureText(options.format).width;
+
+  let textLength = "";
+  let formatType = "string";
+  if (typeof options.format === "function") {
+    formatType = "function";
+    textLength = options.format(new Date().getTime() / UNIX_TIMESTAMP);
+  } else {
+    textLength = options.format;
+  }
+
+  let textWidth = ctx.measureText(textLength).width;
   let textOffset = textWidth / 2;
   let { startTime, endTime, chartAttr, minOffset } = options;
   let { x, y, w, h } = chartAttr;
@@ -28,18 +39,20 @@ export function drawXtick (ctx, args) {
   ctx.fillStyle = "black"
   ctx.textAlign = "left";
   plots.map((pl) => {
-    console.log(pl);
-    let timeValue = moment.unix(pl[0] / 1000).format(options.format);
+    let timeValue;
+    if (formatType === "function") {
+      timeValue = options.format(pl[0] / UNIX_TIMESTAMP)
+    } else {
+      timeValue = moment.unix(pl[0] / UNIX_TIMESTAMP).format(textLength);
+    }
     ctx.fillText(timeValue, pl[1] - textOffset, y + h + 9);
   })
   ctx.restore();
 }
 
-
-
 export function drawYtick (ctx, args) {
   let options = args;
-  let { chartAttr, plots, maxValue, minValue } = options;
+  let { chartAttr, plots, maxValue, minValue, format } = options;
   let { x, y, w, h } = chartAttr;
   let heightInterval = h / plots;
   let tickValue = maxValue;
@@ -48,7 +61,7 @@ export function drawYtick (ctx, args) {
   ctx.fillStyle = "black";
   ctx.textAlign = "right";
   for (let i = 0; i < plots + 1; i++) {
-    ctx.fillText(tickValue, x - 2, ( y + 3 ) + (i * heightInterval));
+    ctx.fillText(format(tickValue), x - 2, ( y + 3 ) + (i * heightInterval));
     tickValue -= ((maxValue - minValue) / plots);
   }
   ctx.restore();

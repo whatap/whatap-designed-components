@@ -22,9 +22,6 @@ const defaultOptions = {
     endTime: new Date().getTime(),
   },
   yAxis: {
-    tickFormat: function (d) {
-      return d;
-    },
     plots: 4,
     maxValue: 100,
     minValue: 0,
@@ -39,7 +36,10 @@ const defaultOptions = {
     },
     tick: {
       display: true,
-      color: '#000000'
+      color: '#000000',
+      format: function (d) {
+        return d;
+      }
     }
   },
   tooltip: {
@@ -47,7 +47,13 @@ const defaultOptions = {
   },
   common: {
     disconnectThreshold: 20 * UNIX_TIMESTAMP * 10000000,
-    identicalDataBehavior: "avg"
+    identicalDataBehavior: "avg",
+    offset: {
+      right: 0,
+      left: 0,
+      top: 0,
+      bottom: 0,
+    }
   }
 }
 
