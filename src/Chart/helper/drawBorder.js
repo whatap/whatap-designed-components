@@ -1,26 +1,33 @@
+import { timeToPos } from '../util/positionCalc'
+import calculateDiff from '../meta/plotMeta';
+
 export function drawXplot (ctx, args) {
   let options = args;
   let textWidth = ctx.measureText(options.format).width;
   let { startTime, endTime, chartAttr, minOffset, xPlotLine } = options;
   let { x, y, w, h } = chartAttr;
 
-  let tickCount = 1;
-  while ((textWidth * tickCount) + (minOffset * 2 * tickCount) < w) {
-    tickCount++;
+  let timeDiff = endTime - startTime;
+  let interval = calculateDiff(timeDiff);
+  let current = startTime - (startTime % interval) + interval;
+  let plots = [];
+
+  while (current < endTime) {
+    let pos = timeToPos(startTime, endTime, x, x + w, current);
+
+    plots.push(pos);
+    current += interval;
   }
-  let timeDiff = (endTime - startTime) / tickCount;
-  let widthInterval = w / tickCount;
-  let textOffset = textWidth / 2;
 
   ctx.save();
-  for (let i = 1; i < tickCount; i++) {
+  plots.map((pl) => {
     ctx.beginPath();
     ctx.setLineDash([1, 2]);
     ctx.strokeStyle = xPlotLine.color;
-    ctx.moveTo(x + (i * widthInterval), y);
-    ctx.lineTo(x + (i * widthInterval), y + h);
+    ctx.moveTo(pl, y);
+    ctx.lineTo(pl, y + h);
     ctx.stroke();
-  }
+  })
   ctx.restore();
 }
 
@@ -73,3 +80,29 @@ export function drawYaxis (ctx, args) {
 
   ctx.restore();
 }
+
+// export function drawXplot (ctx, args) {
+//   let options = args;
+//   let textWidth = ctx.measureText(options.format).width;
+//   let { startTime, endTime, chartAttr, minOffset, xPlotLine } = options;
+//   let { x, y, w, h } = chartAttr;
+
+//   let tickCount = 1;
+//   while ((textWidth * tickCount) + (minOffset * 2 * tickCount) < w) {
+//     tickCount++;
+//   }
+//   let timeDiff = (endTime - startTime) / tickCount;
+//   let widthInterval = w / tickCount;
+//   let textOffset = textWidth / 2;
+
+//   ctx.save();
+//   for (let i = 1; i < tickCount; i++) {
+//     ctx.beginPath();
+//     ctx.setLineDash([1, 2]);
+//     ctx.strokeStyle = xPlotLine.color;
+//     ctx.moveTo(x + (i * widthInterval), y);
+//     ctx.lineTo(x + (i * widthInterval), y + h);
+//     ctx.stroke();
+//   }
+//   ctx.restore();
+// }

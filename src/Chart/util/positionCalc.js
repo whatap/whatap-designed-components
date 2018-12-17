@@ -1,3 +1,4 @@
+
 const ttCalcX = (startTime, endTime, startPos, endPos, mousePosX) => {
   let timeDiff  = endTime - startTime;
   let posDiff   = endPos - startPos;
@@ -25,4 +26,13 @@ const ttRange = (dots) => {
   return minimumTtRange;
 }
 
-export { ttCalcX, ttCalcY, ttRange }
+const timeToPos = (startTime, endTime, startPos, endPos, time) => {
+  let timeDiff = endTime - startTime;
+  let posDiff  = endPos - startPos;
+
+  let posValue = (posDiff * (time - startTime)) / timeDiff + startPos;
+
+  return posValue;
+}
+
+export { ttCalcX, ttCalcY, ttRange, timeToPos }

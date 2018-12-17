@@ -5,7 +5,7 @@
  */
 import WChart from './WChart';
 import moment from 'moment';
-import { ttCalcX, ttRange } from './util/tooltipCalc'
+import { ttCalcX, ttRange } from './util/positionCalc'
 import { drawTooltipCircle } from './helper/drawTooltip';
 
 class LineChart extends WChart{

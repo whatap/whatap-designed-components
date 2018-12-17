@@ -8,7 +8,7 @@ import Tooltip, { drawTooltipCircle } from './helper/drawTooltip';
 import moment from 'moment';
 import { getMousePos } from './helper/mouseEvt'
 import ChartMediator from './mediator/ChartMediator';
-import { ttCalcX, ttRange } from './util/tooltipCalc';
+import { ttCalcX, ttRange } from './util/positionCalc';
 
 class WChart {
   constructor(bindId, colorId, options) {
