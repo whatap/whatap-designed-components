@@ -1,3 +1,4 @@
+import moment from 'moment';
 
 const UNIX_TIMESTAMP = 1000;
 const MINUTE_IN_SECONDS = 60;
@@ -25,7 +26,8 @@ const defaultOptions = {
     plots: 4,
     maxValue: 100,
     minValue: 0,
-    fixedMinMax: true,
+    fixedMin: true,
+    fixedMax: true,
     axisLine: {
       display: true,
       color: '#000000'
@@ -43,10 +45,20 @@ const defaultOptions = {
     }
   },
   tooltip: {
-    range: 1000
+    range: 1000,
+    time: {
+      format: function (d) {
+        return moment.unix(d / 1000).format("YYYY-MM-DD HH:mm:ss");
+      }
+    },
+    value: {
+      format: function (d) {
+        return d.toFixed(1);
+      }
+    }
   },
   common: {
-    disconnectThreshold: 20 * UNIX_TIMESTAMP * 10000000,
+    disconnectThreshold: 20 * UNIX_TIMESTAMP,
     identicalDataBehavior: "avg",
     offset: {
       right: 0,

@@ -48,7 +48,7 @@ export default class Palette {
    * @param {Number} value: Value to be found.
    * @param {Boolean} toString: Check false to return the value in array form. [r, g, b]
    */
-  getColorFromOid = (value, toString = true) => {
+  getColorFromId = (value, toString = true) => {
     const cacheLength = this.cache.length;
     const listLength = this.list.length;
 
@@ -122,7 +122,7 @@ export default class Palette {
    * returns 0 if no valid value is found.
    * @param {Array | String} rgb 
    */
-  getOidFromColor = (rgb) => {
+  getIdFromColor = (rgb) => {
     let rgbStr = rgb;
     if (Array.isArray(rgb) && rgb.length == 3) {
       rgbStr = PaletteColor.printRgb(rgb);

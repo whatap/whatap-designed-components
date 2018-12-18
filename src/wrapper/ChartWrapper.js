@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ChartCollection } from '../Chart'
+import { ChartCollection, LineChart } from '../Chart'
 
 // ChartWrapper.propTypes = {
 //   id: PropTypes.number.isRequired,
@@ -35,16 +35,26 @@ class ChartWrapper extends Component{
 
   componentDidMount() {
     let that = this;
-    const { type, id, colorId, mediator, options } = this.props;
+    const { type, id, colorId, mediator, options, manipulator, data } = this.props;
 
+    console.log("Created new Chart: " + id);
     this.chart = new ChartCollection[type](id, colorId, options);
+    console.log(this.chart);
+    // this.chart = new LineChart(id, colorId, options);
     
     if ( mediator ) {
+      this.chart.mediator = mediator;
       mediator.subscribe(this.chart);
     }
     
-    if ( this.props.data ) {
-      this.chart.loadData(this.props.data);
+    if ( data ) {
+      this.rawData = data;
+      if ( manipulator) {
+        this.data = manipulator(this.rawData);
+      } else {
+        this.data = data;
+      }
+      this.chart.loadData(this.data)
     }
     
     window.addEventListener("resize", that.resizeCanvas, false);
@@ -69,15 +79,27 @@ class ChartWrapper extends Component{
   }
 
   componentWillReceiveProps(nextProps) {
-    const { dataId } = this.props;
+    const { manipulator } = this.props;
     if (typeof nextProps.data !== 'undefined'
-    && !objectCompare(this.props.data, nextProps.data)) {
-      this.chart.loadData(nextProps.data, dataId);
+      && !objectCompare(this.rawData, nextProps.data)) {
+      this.rawData = nextProps.data;
+      if ( manipulator ) {
+        this.data = manipulator(this.rawData);
+      } else {
+        this.data = nextProps.data;
+      }
+      this.chart.loadData(this.data);
     }
     if (typeof nextProps.updateData !== 'undefined' 
     && nextProps.updateData.length > 0
-    && !objectCompare(this.props.updateData, nextProps.updateData)) {
-      this.chart.updateData(nextProps.updateData, dataId);
+    && !objectCompare(this.rawUpdateData, nextProps.updateData)) {
+      this.rawUpdateData = nextProps.updateData;
+      if ( manipulator ) {
+        this.updateData = manipulator(this.rawUpdateData);
+      } else {
+        this.updateData = nextProps.updateData;
+      }
+      this.chart.updateData(this.updateData);
     }
 
   }

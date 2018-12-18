@@ -13,53 +13,54 @@ class LineChart extends WChart{
     super(bindId, colorId, options);
   }
 
-  loadData = (dataset, dataId="data") => {
+  loadData = (dataset) => {
     if (!dataset) return;
     let that      = this;
     let config    = this.config;
     this.maxPlot = config.xAxis.maxPlot;
-    const { minValue, maxValue, fixedMinMax }  = config.yAxis;
+    const { minValue, maxValue, fixedMin, fixedMax }  = config.yAxis;
     
-    if (fixedMinMax) {
-      this.minValue = minValue;
-      this.maxValue = maxValue;
-    }
+    if (fixedMin) this.minValue = minValue;
+    if (fixedMax) this.maxValue = maxValue;
+
+    console.log(fixedMin);
+    console.log(fixedMax);
+
 
     let maxPlotCnt = 0;
 
     if (dataset.length > 0) {
       this.data.clear();
       dataset.map((ds, idx) => {
-        let colorValue = that.palette.getColorFromOid(ds.oid);
+        let colorValue = that.palette.getColorFromId(ds.id);
   
         /**
          * Sorts the inner data in ascending order.
          */
-        that.heapSort.sort(ds[dataId], false, 0);
+        that.heapSort.sort(ds.data, false, 0);
   
         /**
          * If not fixed Minimum / Maximum value, evaluate the data within and decide the max/min value
          */
-        if (!fixedMinMax) {
-          ds[dataId].map((data) => {
-            if (data[1] > that.maxValue ) {
-              that.maxValue = data[1];
-            } else if (data[1] < that.minValue) {
-              that.minValue = data[1];
-            }
-          })
+        ds.data.map((data) => {
+          if (!fixedMax && data[1] > that.maxValue ) {
+            that.maxValue = data[1] * 1.1;
+          } 
+          if (!fixedMin && data[1] < that.minValue) {
+            that.minValue = data[1];
+          }
+        })
+  
+        if (ds.data.length > maxPlotCnt) {
+          maxPlotCnt = ds.data.length;
         }
   
-        if (ds[dataId].length > maxPlotCnt) {
-          maxPlotCnt = ds[dataId].length;
-        }
-  
-        that.data.put(ds.oid, { oname: ds.oname, data: ds[dataId], color: colorValue });
+        that.data.put(ds.id, { label: ds.label, data: ds.data, color: colorValue });
         /**
          * Only get the initial start time when the option is set to `isFixed=false`
          */
         if (!config.xAxis.isFixed) {
-          that.setTimeStandard(ds[dataId], idx);
+          that.setTimeStandard(ds.data, idx);
         }
   
         if (typeof this.maxPlot === 'undefined') {
@@ -80,6 +81,7 @@ class LineChart extends WChart{
     let endTime   = this.endTime;
     let xStart    = this.chartAttr.x;
     let xEnd      = this.chartAttr.x + this.chartAttr.w;
+    let config    = this.config;
 
     let timeValue = ttCalcX(startTime, endTime, xStart, xEnd, mx);
 
@@ -98,19 +100,19 @@ class LineChart extends WChart{
     
     if (this.focused) {
       let currentDot = tooltipList.find((el) => {
-        return that.focused.oid === el.oid
+        return that.focused.id === el.id
       })
       tooltipList = [currentDot];
     }
 
 		if (tooltipList.length !== 0) {
       let maxTooltipWidth = 0;
-      let timestamp = `<div>${moment.unix(tooltipList[0].time / 1000).format("YYYY-MM-DD HH:mm:ss")}</div>`;
+      let timestamp = `<div>${config.tooltip.time.format(tooltipList[0].time)}</div>`;
 
       let list = tooltipList.map((ttl, idx) => {
         let tooltipWidth = 0;
-        if (ttl.oname) {
-          tooltipWidth = parseInt(ctx.measureText(`${ttl.oname}: ${ttl.value.toFixed(1)}`).width);
+        if (ttl.label) {
+          tooltipWidth = parseInt(ctx.measureText(`${ttl.label}: ${ttl.value.toFixed(1)}`).width);
         } else {
           tooltipWidth = parseInt(ctx.measureText(`${ttl.value.toFixed(1)}`).width);
         }
@@ -119,7 +121,7 @@ class LineChart extends WChart{
         }
 
         return {
-          oname: ttl.oname,
+          label: ttl.label,
           value: ttl.value,
           colorLabel: drawTooltipCircle(ttl.color),
         }
@@ -137,7 +139,10 @@ class LineChart extends WChart{
         if (idx !== 0 && idx % listColumns === 0) {
           textOutput += "</div><div style='display: block'>";
         }
-        let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 80}px;'>${ttl.colorLabel} ${ttl.oname ? ttl.oname + ': ' : ''}${ttl.value.toFixed(1)}</div>`;
+        let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 40}px;'>
+                    ${ttl.colorLabel} ${ttl.label ? ttl.label + ': ' : ''}
+                    ${config.tooltip.value.format(ttl.valu  datae)}
+                   </div>`;
 				textOutput += out;
       });
       textOutput += "</div></div>";
@@ -166,16 +171,16 @@ class LineChart extends WChart{
     }
   }
 
-  updateData = (dataset, dataId = "data") => {
+  updateData = (dataset) => {
     if (!dataset) return;
     let that   = this;
     let config = this.config;
-    const { fixedMinMax }  = config.yAxis;
+    const { fixedMin, fixedMax }  = config.yAxis;
 
     dataset.map((ds, idx) => {
-      if (that.data.containsKey(ds.oid)) {
-        let cData = that.data.get(ds.oid);
-        ds[dataId].map((datum) => {
+      if (that.data.containsKey(ds.id)) {
+        let cData = that.data.get(ds.id);
+        ds.data.map((datum) => {
           /**
            * `config.common.identicalDataBehavior`
            * 실시간 데이터의 경우, 데이터 생성이 완료되기 전에 API Call로 인해서 data가 수신되었을 수 있다.
@@ -205,19 +210,18 @@ class LineChart extends WChart{
             cData.data.push(datum);
           }
           
-          if (!fixedMinMax) {
-            if (datum[1] > that.maxValue ) {
-              that.maxValue = datum[1];
-            } else if (datum[1] < that.minValue) {
-              that.minValue = datum[1];
-            }
+          if (!fixedMax && datum[1] > that.maxValue ) {
+            that.maxValue = datum[1] * 1.1;
+          } 
+          if (!fixedMin && datum[1] < that.minValue) {
+            that.minValue = datum[1];
           }
         })
 
         that.heapSort.sort(cData.data, false, 0);
       } else {
-        let colorValue = that.palette.getColorFromOid(ds.oid);
-        that.data.put(ds.oid, { oname: ds.oname, data: ds[dataId], color: colorValue });
+        let colorValue = that.palette.getColorFromId(ds.id);
+        that.data.put(ds.id, { label: ds.label, data: ds.data1, color: colorValue });
       }
     })
 
@@ -248,6 +252,8 @@ class LineChart extends WChart{
     let config    = this.config;
     const { disconnectThreshold } = config.common;
     const { x, y, w, h }          = this.chartAttr;
+
+    ctx.save();
 
 		let _dots = [];
     let en = this.data.keys();
@@ -284,7 +290,7 @@ class LineChart extends WChart{
           ctx.beginPath();
           
           ctx.strokeStyle = value.color;
-					if (this.focused && this.focused.oid !== key) {
+					if (this.focused && this.focused.id !== key) {
 						ctx.strokeStyle = "rgba(245,245,245,0.5)";
 					}
           ctx.moveTo(xCoord, yCoord);
@@ -301,8 +307,8 @@ class LineChart extends WChart{
         }
 
 				_dots.push({
-					oid: key,
-					oname: value.oname,
+					id: key,
+					label: value.label,
 					color: value.color,
 				  x: xCoord,
 					y: yCoord,
@@ -315,7 +321,8 @@ class LineChart extends WChart{
         prevTimestamp = datum[0];
       })
     }
-	  this.dots = _dots;
+    this.dots = _dots;
+    ctx.restore();
   }
 }
 

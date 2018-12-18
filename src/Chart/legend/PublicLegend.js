@@ -17,12 +17,12 @@ class PublicLegend {
     for (let i = 0; i < length; i++) {
       let data = dataset[i];
       let exists = this.dataset.find((ds) => {
-        return ds.oid === data.oid;
+        return ds.id === data.id;
       });
       if (typeof exists === 'undefined') {
         this.dataset.push({ 
-          oid: data.oid, 
-          oname: data.oname, 
+          id: data.id, 
+          label: data.label, 
           focus: true
         });
       }
@@ -34,21 +34,21 @@ class PublicLegend {
     for (let i = 0; i < length; i++) {
       let data = dataset[i];
       let exists = this.dataset.find((ds) => {
-        return ds.oid === data.oid;
+        return ds.id === data.id;
       });
       if (typeof exists === 'undefined') {
         this.dataset.push({ 
-          oid: data.oid, 
-          oname: data.oname, 
+          id: data.id, 
+          label: data.label, 
           focus: true
         });
       }
     }
   }
 
-  handleClick = (oid) => {
+  handleClick = (id) => {
     let data = this.dataset.find((ds) => {
-      return ds.oid === oid;
+      return ds.id === id;
     })
 
     this.notifyMediator('clicked', data);

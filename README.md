@@ -27,15 +27,15 @@ whatap-designed-components consists set of utilities and components used commonl
 ![Color Palette](color-palette.png)
 
 Palette takes an ID and converts it into a RGB value (Vice versa).
-* `getColorFromOid(value, toString)`: takes an OID value and returns the respective color from the list. If the OID is not assigned to a color, stores it to the list. returns in Array [R, G, B] if `toString` is set to `false`.
-* `getOidFromColor(rgb)`: takes a RGB value array or string and returns an OID value stored. If the OID doesn't exist, returns 0.
+* `getColorFromId(value, toString)`: takes an id value and returns the respective color from the list. If the id is not assigned to a color, stores it to the list. returns in Array [R, G, B] if `toString` is set to `false`.
+* `getIdFromColor(rgb)`: takes a RGB value array or string and returns an id value stored. If the id doesn't exist, returns 0.
 
 ### Basic Philosophy
 Developers at WhaTap always had concerns with colors when trying to create series charts. One of the main reasons was that colors within charts kept switching when changing pages as our users moved from one page to another. Another was when our users drew more than 20 lines, repetition in color palette lowered our user experience. However, increasing the number of colors wasn't the solution to our problem as increasing the color count made our charts disorienting.
 
 That is why we've created this color palette. Colors are created based on 19 colors provided on our palette (you can customize this too). After all the colors inside the palette has been used at least once, It will find the color with the lowest duplication, and create a child color node with the slightly different rgb color (in this case, find the lowest one within RGB value, and adds 10).
 
-Colors are stored in Array - LinkedList form, so after assigning a color to an OID, user can retrieve that OID based on the designated RGB value.
+Colors are stored in Array - LinkedList form, so after assigning a color to an id, user can retrieve that id based on the designated RGB value.
 
 We went on and solved another issue by storing the data inside localStorage. By providing the same ID (in our case it was the project code), users can maintain their color data even when switching page from one place to another.
 
@@ -45,11 +45,11 @@ import { Palette } from 'whatap-designed-components';
 
 const palette = new Palette(12345, true);
 
-let firstRgb = palette.getColorFromOid(123); // retrieves the first palette color, in the default case, it is "rgb(50,154,240)"
-let secondRgb = palette.getColorFromOid(456); // retrieves the second palette color
+let firstRgb = palette.getColorFromId(123); // retrieves the first palette color, in the default case, it is "rgb(50,154,240)"
+let secondRgb = palette.getColorFromId(456); // retrieves the second palette color
 
-let firstValueOid = palette.getOidFromColor(firstRgb); // retrieves `123`
-let secondValueOid = palette.getOidFromColor(secondRgb); // retrives `456`
+let firstValueid = palette.getIdFromColor(firstRgb); // retrieves `123`
+let secondValueid = palette.getIdFromColor(secondRgb); // retrives `456`
 ```
 
 ## ColorPicker

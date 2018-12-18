@@ -1,6 +1,7 @@
 import moment from 'moment';
 import calculateDiff from '../meta/plotMeta'
 import { timeToPos } from '../util/positionCalc';
+import { FONT_SIZE, CHART_TICK_OFFSET_Y } from '../meta/globalMeta'
 
 const UNIX_TIMESTAMP = 1000;
 
@@ -45,7 +46,7 @@ export function drawXtick (ctx, args) {
     } else {
       timeValue = moment.unix(pl[0] / UNIX_TIMESTAMP).format(textLength);
     }
-    ctx.fillText(timeValue, pl[1] - textOffset, y + h + 9);
+    ctx.fillText(timeValue, pl[1] - textOffset, y + h + FONT_SIZE + CHART_TICK_OFFSET_Y);
   })
   ctx.restore();
 }

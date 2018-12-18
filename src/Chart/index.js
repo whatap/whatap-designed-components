@@ -2,7 +2,7 @@ import LineChart from './LineChart'
 import ChartMediator from './mediator/ChartMediator'
 import PublicLegend from './legend/PublicLegend'
 
-const ChartCollection = {
+let ChartCollection = {
   "LineChart": LineChart
 }
 
