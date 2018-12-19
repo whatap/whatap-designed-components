@@ -35,16 +35,20 @@ class ChartWrapper extends Component{
 
   componentDidMount() {
     let that = this;
-    const { type, id, colorId, mediator, options, manipulator, data } = this.props;
+    const { type, id, colorId, mediator, options, manipulator, data, chartRef } = this.props;
 
     console.log("Created new Chart: " + id);
     this.chart = new ChartCollection[type](id, colorId, options);
     console.log(this.chart);
     // this.chart = new LineChart(id, colorId, options);
     
-    if ( mediator ) {
-      this.chart.mediator = mediator;
-      mediator.subscribe(this.chart);
+    // if ( mediator ) {
+    //   this.chart.mediator = mediator;
+    //   mediator.subscribe(this.chart);
+    // }
+
+    if ( chartRef ) {
+      chartRef(this.chart);
     }
     
     if ( data ) {

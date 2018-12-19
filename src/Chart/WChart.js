@@ -12,6 +12,7 @@ import { ttCalcX, ttRange } from './util/positionCalc';
 import { calculateFormat } from './meta/plotMeta';
 import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X } from './meta/globalMeta';
 import { merge } from 'lodash/object';
+import { drawHelper } from './helper/drawHelper'
 
 class WChart {
   constructor(bindId, colorId, options) {
@@ -26,10 +27,10 @@ class WChart {
     this.mediator = undefined;
   }
 
-  notifyMediator = (action, arg) => {
+  notifyMediator = (action, func, arg) => {
     if (typeof this.mediator !== 'undefined' 
     && typeof this.mediator[action] !== 'undefined') {
-      this.mediator[action](arg);
+      this.mediator[action](func, arg);
     }
   }
 
@@ -121,7 +122,11 @@ class WChart {
   }
 
   handleMouseMove = (evt) => {
-    let mousePos = getMousePos(evt, this.overrideClientRect());
+    let mousePos       = getMousePos(evt, this.overrideClientRect());
+    let ctx            = this.ctx;
+    let config         = this.config;
+    let { x, y, w, h } = this.chartAttr;
+    let { mx, my }     = mousePos;
 
     let textOutput = this.findTooltipData(mousePos);
 
@@ -137,11 +142,23 @@ class WChart {
         this.tooltip.remove();
       }
     }
+
+    this.drawChart();
+    drawHelper(ctx, this.chartAttr, mousePos, {
+      startTime: this.startTime,
+      endTime: this.endTime,
+      maxValue: this.maxValue,
+      minValue: this.minValue,
+      xAxisFormat: config.xAxis.tick.format || calculateFormat(diff),
+      yAxisFormat: config.yAxis.tick.format,
+    });
   }
 
   handleMouseOut = (evt) => {
     this.mouseFollow = false;
     this.tooltip.remove();
+
+    this.drawChart();
   }
 
   handleMouseClick = (evt) => {
@@ -172,7 +189,7 @@ class WChart {
 			}
 		}
     this.drawSelected(selectedDot);
-    this.notifyMediator("clicked", selectedDot);
+    this.notifyMediator("clicked", "drawSelected", selectedDot);
   }
 
   findTooltipData = (pos) => {
@@ -207,7 +224,7 @@ class WChart {
     this._drawAxis();
     // this._drawLabel();
   }
-   
+
   resetData = () =>{
     this.data.clear();
   }

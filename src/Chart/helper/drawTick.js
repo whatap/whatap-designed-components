@@ -62,7 +62,11 @@ export function drawYtick (ctx, args) {
   ctx.fillStyle = "black";
   ctx.textAlign = "right";
   for (let i = 0; i < plots + 1; i++) {
-    ctx.fillText(format(tickValue), x - 2, ( y + 3 ) + (i * heightInterval));
+    let formattedY = format(tickValue);
+    if (typeof formattedY === "undefined" || formattedY === "undefined") {
+      formattedY = "0";
+    }
+    ctx.fillText(formattedY, x - 2, ( y + 3 ) + (i * heightInterval));
     tickValue -= ((maxValue - minValue) / plots);
   }
   ctx.restore();

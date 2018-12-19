@@ -8,7 +8,11 @@ const ttCalcX = (startTime, endTime, startPos, endPos, mousePosX) => {
 }
 
 const ttCalcY = (minValue, maxValue, startPos, endPos, mousePosY) => {
-
+  let valueDiff = maxValue - minValue;
+  let posDiff   = endPos - startPos;
+  let value     = maxValue - (valueDiff * (mousePosY - startPos) / posDiff );
+  
+  return value;
 }
 
 const ttRange = (dots) => {

@@ -23,16 +23,12 @@ class LineChart extends WChart{
     if (fixedMin) this.minValue = minValue;
     if (fixedMax) this.maxValue = maxValue;
 
-    console.log(fixedMin);
-    console.log(fixedMax);
-
-
     let maxPlotCnt = 0;
 
     if (dataset.length > 0) {
       this.data.clear();
       dataset.map((ds, idx) => {
-        let colorValue = that.palette.getColorFromId(ds.id);
+        let colorValue = that.palette.getColorFromId(ds.key);
   
         /**
          * Sorts the inner data in ascending order.
@@ -55,7 +51,7 @@ class LineChart extends WChart{
           maxPlotCnt = ds.data.length;
         }
   
-        that.data.put(ds.id, { label: ds.label, data: ds.data, color: colorValue });
+        that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data, color: colorValue });
         /**
          * Only get the initial start time when the option is set to `isFixed=false`
          */
@@ -141,7 +137,7 @@ class LineChart extends WChart{
         }
         let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 40}px;'>
                     ${ttl.colorLabel} ${ttl.label ? ttl.label + ': ' : ''}
-                    ${config.tooltip.value.format(ttl.valu  datae)}
+                    ${config.tooltip.value.format(ttl.value)}
                    </div>`;
 				textOutput += out;
       });
@@ -178,8 +174,8 @@ class LineChart extends WChart{
     const { fixedMin, fixedMax }  = config.yAxis;
 
     dataset.map((ds, idx) => {
-      if (that.data.containsKey(ds.id)) {
-        let cData = that.data.get(ds.id);
+      if (that.data.containsKey(ds.key)) {
+        let cData = that.data.get(ds.key);
         ds.data.map((datum) => {
           /**
            * `config.common.identicalDataBehavior`
@@ -220,8 +216,8 @@ class LineChart extends WChart{
 
         that.heapSort.sort(cData.data, false, 0);
       } else {
-        let colorValue = that.palette.getColorFromId(ds.id);
-        that.data.put(ds.id, { label: ds.label, data: ds.data1, color: colorValue });
+        let colorValue = that.palette.getColorFromId(ds.key);
+        that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data1, color: colorValue });
       }
     })
 
@@ -285,12 +281,12 @@ class LineChart extends WChart{
         /**
          * plot과 plot을 이어주는 line
          */
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.5;
         if (idx === 0) {
           ctx.beginPath();
           
           ctx.strokeStyle = value.color;
-					if (this.focused && this.focused.id !== key) {
+					if (this.focused && this.focused.id !== value.id) {
 						ctx.strokeStyle = "rgba(245,245,245,0.5)";
 					}
           ctx.moveTo(xCoord, yCoord);
@@ -307,11 +303,14 @@ class LineChart extends WChart{
         }
 
 				_dots.push({
-					id: key,
+          key: key,
+					id: value.id,
 					label: value.label,
 					color: value.color,
 				  x: xCoord,
-					y: yCoord,
+          y: yCoord,
+          xPos: xPos,
+          yPos: yPos,
 					r: 5,
           offset: 3,
           time: datum[0],

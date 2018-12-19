@@ -1,5 +1,5 @@
 import PaletteColor from "./PaletteColor";
-import { defaultPalette } from './defaults';
+import { defaultPalette, nonInstanceColor } from './defaults';
 import { CoreFunc, LSHandler } from '../core';
 
 /**
@@ -52,10 +52,16 @@ export default class Palette {
     const cacheLength = this.cache.length;
     const listLength = this.list.length;
 
+
+    if (value === -1) {
+      return this.returnColor(nonInstanceColor.rgb, toString);
+    }
+
     /**
      * Search through the List to find if the oid has already been assigned.
      * If so, return that color and return 
      */
+
     for (let i = 0; i < cacheLength; i++) {
       let cachedColor = this.cache[i];
       if (cachedColor.oid === value) {

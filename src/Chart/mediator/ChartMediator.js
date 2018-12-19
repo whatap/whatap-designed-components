@@ -9,12 +9,12 @@ class ChartMediator {
     this.charts = [];
   }
   subscribe = (chart) => {
-    if (chart instanceof WChart) {
-      this.charts.push(chart);
-      console.log("subscribed");
-    } else {
-      throw new Error("Please provide an instance of WChart");
-    }
+    this.charts.push(chart);
+    // if (chart instanceof WChart) {
+    //   console.log("subscribed");
+    // } else {
+    //   throw new Error("Please provide an instance of WChart");
+    // }
   }
 
   unsubscribe = (chart) => {
@@ -29,11 +29,14 @@ class ChartMediator {
   unsubscribeAll = () => {
     this.charts = [];
   }
-  clicked = (data) => {
+  clicked = (func, data) => {
     let charts = this.charts;
     let length = charts.length;
     for (let i = 0; i < length; i++) {
-      charts[i].drawSelected(data);
+      let chart = charts[i];
+      if (typeof chart[func] === "function") {
+        chart[func](data);
+      }
     }
   }
 }
