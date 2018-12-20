@@ -1,6 +1,6 @@
 {
   "name": "whatap-designed-components",
-  "version": "0.3.1-alpha.1",
+  "version": "0.4.0-alpha.0",
   "description": "Designed components used at WhaTap",
   "main": "src/index.js",
   "module": "es/index.js",
@@ -15,6 +15,7 @@
     "build:umd": "webpack",
     "build:es6": "babel src --out-dir es",
     "build:demo": "babel src --out-dir ../wdc-demo/src/wdc",
+    "build:whatap": "babel src --out-dir ../apm/io.whatap/whatap.server.front.apm/src/main/resources/front/node_modules/whatap-designed-components/es",
     "build:all": "npm run test:assert && npm run build:umd && npm run build:es6",
     "publish:latest": "npm publish",
     "publish:alpha": "npm publish --tag alpha",

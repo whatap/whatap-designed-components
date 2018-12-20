@@ -87,6 +87,11 @@ class WChart {
     this.maxValue  = this.config.yAxis.maxValue;
   }
 
+  updateOptions = (newOptions) => {
+    this.config    = merge({}, this.config, newOptions);
+    this.drawChart();
+  }
+
   initCanvas = () => {
     this.wGetBoundingClientRect(this.canvas);
     this.wGetScreenRatio();

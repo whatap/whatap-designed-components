@@ -7,6 +7,7 @@ import WChart from './WChart';
 import moment from 'moment';
 import { ttCalcX, ttRange } from './util/positionCalc'
 import { drawTooltipCircle } from './helper/drawTooltip';
+import { TEN_MIN_IN_MILLIS } from './meta/plotMeta';
 
 class LineChart extends WChart{
   constructor(bindId, colorId, options) {
@@ -15,6 +16,8 @@ class LineChart extends WChart{
 
   loadData = (dataset) => {
     if (!dataset) return;
+    console.log("dataset");
+    console.log(dataset);
     let that      = this;
     let config    = this.config;
     this.maxPlot = config.xAxis.maxPlot;
@@ -151,20 +154,36 @@ class LineChart extends WChart{
 
 
   setTimeStandard = (data, idx) => {
+    let config = this.config;
+    let { timeDiff } = config.xAxis
+
+    let current = new Date().getTime();
+    this.endTime = current;
+    this.startTime = current - timeDiff;
+
     if (idx === 0) {
-      this.startTime = data[0][0];
-      this.endTime = data[0][0];
+      this.dataStartTime = data[0][0];
+      this.dataEndTime = data[0][0];
     }
 
     let length = data.length;
+    
     for (let i = 0; i < length; i++) {
-      if (this.startTime > data[i][0]) {
-        this.startTime = data[i][0];
+      if (this.dataStartTime > data[i][0]) {
+        this.dataStartTime = data[i][0];
       }
-      if (this.endTime < data[i][0]) {
-        this.endTime = data[i][0];
+      if (this.dataEndTime < data[i][0]) {
+        this.dataEndTime = data[i][0];
       }
     }
+
+    if (this.startTime < this.dataStartTime) {
+      this.startTime = this.dataStartTime;
+    }
+    if (this.endTime > this.dataEndTime) {
+      this.endTime = this.dataEndTime;
+    }
+
   }
 
   updateData = (dataset) => {
@@ -246,6 +265,7 @@ class LineChart extends WChart{
 		let startTime = this.startTime;
     let endTime   = this.endTime;
     let config    = this.config;
+    // const { timeDiff }            = config.xAxis;
     const { disconnectThreshold } = config.common;
     const { x, y, w, h }          = this.chartAttr;
 
@@ -258,12 +278,13 @@ class LineChart extends WChart{
       let value = this.data.get(key);
       let prevTimestamp = 0;
 
-      value.data.map((datum, idx) => {
-        if (datum[0] < startTime || datum[0] > endTime ) return;
-        /**
-         * TODO: STARTTIME에 문제가 있음.
-         */
-        let xPos = (datum[0] - startTime) / (endTime - startTime);
+      let length = value.data.length;
+      let lineInit = false;
+      for (let i = 0; i < length; i++) {
+        let datum = value.data[i];
+        if (datum[0] < startTime) continue;
+      
+        let xPos = (parseInt(datum[0] / 1000) * 1000 - startTime) / (endTime - startTime);
         let xCoord = x + (w * xPos);
 
         let yPos = 1;
@@ -282,7 +303,7 @@ class LineChart extends WChart{
          * plot과 plot을 이어주는 line
          */
         ctx.lineWidth = 1.5;
-        if (idx === 0) {
+        if (!lineInit) {
           ctx.beginPath();
           
           ctx.strokeStyle = value.color;
@@ -290,6 +311,7 @@ class LineChart extends WChart{
 						ctx.strokeStyle = "rgba(245,245,245,0.5)";
 					}
           ctx.moveTo(xCoord, yCoord);
+          lineInit = true;
         } else {
           if (datum[0] - prevTimestamp < disconnectThreshold) {
             ctx.lineTo(xCoord, yCoord);
@@ -318,7 +340,10 @@ class LineChart extends WChart{
         })
 
         prevTimestamp = datum[0];
-      })
+      }
+      // value.data.map((datum, idx) => {
+        
+      // })
     }
     this.dots = _dots;
     ctx.restore();

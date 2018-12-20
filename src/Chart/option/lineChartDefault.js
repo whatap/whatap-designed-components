@@ -2,10 +2,11 @@ import moment from 'moment';
 
 const UNIX_TIMESTAMP = 1000;
 const MINUTE_IN_SECONDS = 60;
+const TEN_MINUTE_IN_MILLIS = 10 * MINUTE_IN_SECONDS * UNIX_TIMESTAMP;
 
 const defaultOptions = {
   xAxis: {
-    // maxPlot: 120, // 5 seconds interval for 10 minutes
+    maxPlot: 140, // 5 seconds interval for 10 minutes
     axisLine: {
       display: true,
       color: '#000000',
@@ -19,8 +20,7 @@ const defaultOptions = {
       color: '#000000'
     },
     isFixed: false,
-    startTime: (new Date().getTime()) - (UNIX_TIMESTAMP * MINUTE_IN_SECONDS * 10),
-    endTime: new Date().getTime(),
+    timeDiff: TEN_MINUTE_IN_MILLIS,
   },
   yAxis: {
     plots: 4,

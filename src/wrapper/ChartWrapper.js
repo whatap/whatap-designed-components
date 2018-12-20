@@ -15,7 +15,10 @@ import { ChartCollection, LineChart } from '../Chart'
 
 function objectCompare (object1, object2) {
   // Return if value is not an object
-  if (typeof object1 !== 'object' || typeof object2 !== 'object') return ;
+  if (typeof object1 !== 'object') {
+    object1 = {};
+  }
+  if (typeof object2 !== 'object') return ;
   return JSON.stringify(object1) === JSON.stringify(object2);
 }
 
@@ -37,15 +40,7 @@ class ChartWrapper extends Component{
     let that = this;
     const { type, id, colorId, mediator, options, manipulator, data, chartRef } = this.props;
 
-    console.log("Created new Chart: " + id);
     this.chart = new ChartCollection[type](id, colorId, options);
-    console.log(this.chart);
-    // this.chart = new LineChart(id, colorId, options);
-    
-    // if ( mediator ) {
-    //   this.chart.mediator = mediator;
-    //   mediator.subscribe(this.chart);
-    // }
 
     if ( chartRef ) {
       chartRef(this.chart);
@@ -92,10 +87,11 @@ class ChartWrapper extends Component{
       } else {
         this.data = nextProps.data;
       }
+
       this.chart.loadData(this.data);
     }
+
     if (typeof nextProps.updateData !== 'undefined' 
-    && nextProps.updateData.length > 0
     && !objectCompare(this.rawUpdateData, nextProps.updateData)) {
       this.rawUpdateData = nextProps.updateData;
       if ( manipulator ) {
@@ -104,6 +100,10 @@ class ChartWrapper extends Component{
         this.updateData = nextProps.updateData;
       }
       this.chart.updateData(this.updateData);
+    }
+
+    if (!objectCompare(this.props.options, nextProps.options)) {
+      this.chart.updateOptions(nextProps.options);
     }
 
   }
