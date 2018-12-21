@@ -16,6 +16,7 @@ import { drawHelper } from './helper/drawHelper'
 
 /**
  * TODO: 색상 관련 문제 해결 및 Dark Theme 대응 처리
+ * TODO: Palette 관련 문제 해결 -> Singleton으로 변경할 필요 있음
  */
 class WChart {
   constructor(bindId, colorId, options) {
