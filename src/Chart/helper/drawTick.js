@@ -7,6 +7,8 @@ const UNIX_TIMESTAMP = 1000;
 
 export function drawXtick (ctx, args) {
   let options = args;
+  let { startTime, endTime, chartAttr, minOffset } = options;
+  let { x, y, w, h } = chartAttr;
 
   let textLength = "";
   let formatType = "string";
@@ -16,11 +18,10 @@ export function drawXtick (ctx, args) {
   } else {
     textLength = options.format;
   }
-
+  
   let textWidth = ctx.measureText(textLength).width;
+  let totalPlotCnt = (w / textWidth).toFixed(2);
   let textOffset = textWidth / 2;
-  let { startTime, endTime, chartAttr, minOffset } = options;
-  let { x, y, w, h } = chartAttr;
 
   let timeDiff = endTime - startTime;
   let interval = calculateDiff(timeDiff);
@@ -39,18 +40,32 @@ export function drawXtick (ctx, args) {
   ctx.save();
   ctx.fillStyle = "black"
   ctx.textAlign = "left";
-  plots.map((pl) => {
-    let timeValue;
-    if (formatType === "function") {
-      timeValue = options.format(pl[0] / UNIX_TIMESTAMP)
-    } else {
-      timeValue = moment.unix(pl[0] / UNIX_TIMESTAMP).format(textLength);
+
+  let divisor = 1;
+  let plotCount = plots.length * 1.2;
+  while (plotCount > totalPlotCnt) {
+    divisor += 1;
+    plotCount /= 2;
+  }
+
+  plots.map((pl, idx) => {
+    if (idx % divisor === 0) {
+      let timeValue;
+      if (formatType === "function") {
+        timeValue = options.format(pl[0] / UNIX_TIMESTAMP)
+      } else {
+        timeValue = moment.unix(pl[0] / UNIX_TIMESTAMP).format(textLength);
+      }
+      ctx.fillText(timeValue, pl[1] - textOffset, y + h + FONT_SIZE + CHART_TICK_OFFSET_Y);
     }
-    ctx.fillText(timeValue, pl[1] - textOffset, y + h + FONT_SIZE + CHART_TICK_OFFSET_Y);
   })
   ctx.restore();
 }
 
+/**
+ * TODO: `drawYtick` 관련 로직 수정 필요 
+ * yPlot 정수로 dynamic하게 떨어지도록 수정
+ */
 export function drawYtick (ctx, args) {
   let options = args;
   let { chartAttr, plots, maxValue, minValue, format } = options;
@@ -63,33 +78,9 @@ export function drawYtick (ctx, args) {
   ctx.textAlign = "right";
   for (let i = 0; i < plots + 1; i++) {
     let formattedY = format(tickValue);
-    if (typeof formattedY === "undefined" || formattedY === "undefined") {
-      formattedY = "0";
-    }
+
     ctx.fillText(formattedY, x - 2, ( y + 3 ) + (i * heightInterval));
     tickValue -= ((maxValue - minValue) / plots);
   }
   ctx.restore();
 }
-
-// export function drawXtick (ctx, args) {
-//   let options = args;
-//   let textWidth = ctx.measureText(options.format).width;
-//   let { startTime, endTime, chartAttr, minOffset } = options;
-//   let { x, y, w, h } = chartAttr;
-
-//   let tickCount = 1;
-//   while ((textWidth * tickCount) + (minOffset * 2 * tickCount) < w) {
-//     tickCount++;
-//   }
-//   let timeDiff = (endTime - startTime) / tickCount;
-//   let widthInterval = w / tickCount;
-//   let textOffset = textWidth / 2;
-  
-//   ctx.restore();
-//   for (let i = 1; i < tickCount; i++) {
-//     ctx.textAlign = "left";
-//     let timeValue = moment.unix((options.startTime + (i * timeDiff)) / 1000 ).format(options.format);
-//     ctx.fillText(timeValue, x + (i * widthInterval) - textOffset, y + h + 9)
-//   }
-// }

@@ -8,6 +8,7 @@ import moment from 'moment';
 import { ttCalcX, ttRange } from './util/positionCalc'
 import { drawTooltipCircle } from './helper/drawTooltip';
 import { TEN_MIN_IN_MILLIS } from './meta/plotMeta';
+import { getMaxValue } from './util/positionCalc';
 
 class LineChart extends WChart{
   constructor(bindId, colorId, options) {
@@ -43,7 +44,7 @@ class LineChart extends WChart{
          */
         ds.data.map((data) => {
           if (!fixedMax && data[1] > that.maxValue ) {
-            that.maxValue = data[1] * 1.1;
+            that.maxValue = getMaxValue(data[1])
           } 
           if (!fixedMin && data[1] < that.minValue) {
             that.minValue = data[1];
@@ -226,7 +227,7 @@ class LineChart extends WChart{
           }
           
           if (!fixedMax && datum[1] > that.maxValue ) {
-            that.maxValue = datum[1] * 1.1;
+            that.maxValue = getMaxValue(datum[1]);
           } 
           if (!fixedMin && datum[1] < that.minValue) {
             that.minValue = datum[1];
@@ -284,7 +285,7 @@ class LineChart extends WChart{
         let datum = value.data[i];
         if (datum[0] < startTime) continue;
       
-        let xPos = (parseInt(datum[0] / 1000) * 1000 - startTime) / (endTime - startTime);
+        let xPos = (datum[0]- startTime) / (endTime - startTime);
         let xCoord = x + (w * xPos);
 
         let yPos = 1;

@@ -39,4 +39,20 @@ const timeToPos = (startTime, endTime, startPos, endPos, time) => {
   return posValue;
 }
 
-export { ttCalcX, ttCalcY, ttRange, timeToPos }
+/**
+ * TODO: `getMaxValue` 관련 로직 수정 필요
+ */
+const getMaxValue = (data) => {
+  let current = data;
+  let units = 1;
+  while (parseInt(current / units) !== 0) {
+    units *= 10;
+    current /= 10;
+  }
+
+  let dataDividedByTen = units / 10 > 1 ? units / 10 : 1;
+
+  return data - (data % dataDividedByTen) + (dataDividedByTen * 5);
+}
+
+export { ttCalcX, ttCalcY, ttRange, timeToPos, getMaxValue }

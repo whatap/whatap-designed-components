@@ -14,6 +14,9 @@ import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X } fr
 import { merge } from 'lodash/object';
 import { drawHelper } from './helper/drawHelper'
 
+/**
+ * TODO: 색상 관련 문제 해결 및 Dark Theme 대응 처리
+ */
 class WChart {
   constructor(bindId, colorId, options) {
     this.init(bindId, colorId);
@@ -149,14 +152,17 @@ class WChart {
     }
 
     this.drawChart();
-    drawHelper(ctx, this.chartAttr, mousePos, {
-      startTime: this.startTime,
-      endTime: this.endTime,
-      maxValue: this.maxValue,
-      minValue: this.minValue,
-      xAxisFormat: config.xAxis.tick.format || calculateFormat(diff),
-      yAxisFormat: config.yAxis.tick.format,
-    });
+
+    if (config.common.drawHelper) {
+      drawHelper(ctx, this.chartAttr, mousePos, {
+        startTime: this.startTime,
+        endTime: this.endTime,
+        maxValue: this.maxValue,
+        minValue: this.minValue,
+        xAxisFormat: config.xAxis.tick.format || calculateFormat(diff),
+        yAxisFormat: config.yAxis.tick.format,
+      });
+    }
   }
 
   handleMouseOut = (evt) => {
@@ -284,7 +290,7 @@ class WChart {
       xAxisLine
     }
     const yOptions = { 
-      plots: config.yAxis.plots,
+      plots: config.yAxis.maxPlots,
       chartAttr, 
       yPlotLine, 
       yAxisLine,
@@ -323,7 +329,7 @@ class WChart {
       format: yAxisFormat,
       minValue, maxValue,
       chartAttr, yPlotLine, yAxisLine,
-      plots: config.yAxis.plots
+      plots: config.yAxis.maxPlots
     } 
 
     /**
