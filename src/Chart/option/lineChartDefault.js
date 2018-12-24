@@ -23,7 +23,7 @@ const defaultOptions = {
     timeDiff: TEN_MINUTE_IN_MILLIS,
   },
   yAxis: {
-    maxPlots: 10,
+    maxPlots: false,
     maxValue: 100,
     minValue: 0,
     fixedMin: true,

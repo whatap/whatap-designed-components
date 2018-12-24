@@ -17,11 +17,11 @@ class LineChart extends WChart{
 
   loadData = (dataset) => {
     if (!dataset) return;
-    console.log("dataset");
-    console.log(dataset);
+
     let that      = this;
     let config    = this.config;
-    this.maxPlot = config.xAxis.maxPlot;
+    let plots     = this.plots;
+    this.maxPlot  = config.xAxis.maxPlot;
     const { minValue, maxValue, fixedMin, fixedMax }  = config.yAxis;
     
     if (fixedMin) this.minValue = minValue;
@@ -44,7 +44,7 @@ class LineChart extends WChart{
          */
         ds.data.map((data) => {
           if (!fixedMax && data[1] > that.maxValue ) {
-            that.maxValue = getMaxValue(data[1])
+            that.maxValue = getMaxValue(data[1], plots)
           } 
           if (!fixedMin && data[1] < that.minValue) {
             that.minValue = data[1];
@@ -191,6 +191,7 @@ class LineChart extends WChart{
     if (!dataset) return;
     let that   = this;
     let config = this.config;
+    let plots  = this.plots;
     const { fixedMin, fixedMax }  = config.yAxis;
 
     dataset.map((ds, idx) => {
@@ -227,7 +228,7 @@ class LineChart extends WChart{
           }
           
           if (!fixedMax && datum[1] > that.maxValue ) {
-            that.maxValue = getMaxValue(datum[1]);
+            that.maxValue = getMaxValue(datum[1], plots);
           } 
           if (!fixedMin && datum[1] < that.minValue) {
             that.minValue = datum[1];

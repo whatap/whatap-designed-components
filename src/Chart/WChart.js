@@ -8,7 +8,7 @@ import Tooltip, { drawTooltipCircle } from './helper/drawTooltip';
 import moment from 'moment';
 import { getMousePos } from './helper/mouseEvt'
 import ChartMediator from './mediator/ChartMediator';
-import { ttCalcX, ttRange } from './util/positionCalc';
+import { ttCalcX, ttRange, calculatePlots } from './util/positionCalc';
 import { calculateFormat } from './meta/plotMeta';
 import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X } from './meta/globalMeta';
 import { merge } from 'lodash/object';
@@ -249,19 +249,19 @@ class WChart {
     let ctx    = this.ctx;
     let width  = this.bcRect.width;
     let height = this.bcRect.height;
-    let plots  = this.plots;
     let config = this.config;
     ctx.clearRect(0, 0, width, height);
 
     ctx.font = `${FONT_SIZE}px ${FONT_TYPE}`
     // ctx.save();
 
-    let yAxisMax = this.config.yAxis.tick.format(this.maxValue);
+    let yAxisMax     = this.config.yAxis.tick.format(this.maxValue);
     this.chartAttr.x = (config.yAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + CHART_TICK_OFFSET_X : CHART_NON_TICK_OFFSET_X;
     this.chartAttr.y = (config.xAxis.tick.display) ? 5 : 5;
     this.chartAttr.w = width - this.chartAttr.x - config.common.offset.right;
     this.chartAttr.h = (config.xAxis.tick.display) ? height - this.chartAttr.y - 20 : height - this.chartAttr.y - 5;
-    
+    this.plots       = typeof config.yAxis.maxPlots === "number" ? config.yAxis.maxPlots : calculatePlots(this.chartAttr.h);
+
     ctx.fillStyle = "rgba(0,0,0,0)";
     ctx.fillRect(0, 0, width, height);
 
@@ -275,6 +275,7 @@ class WChart {
     let startTime   = this.startTime;
     let endTime     = this.endTime;
     let chartAttr   = this.chartAttr;
+    let plots       = this.plots;
     let xAxisFormat = config.xAxis.tick.format;
     let yAxisFormat = config.yAxis.tick.format;
     let diff        = startTime - endTime;
@@ -291,7 +292,7 @@ class WChart {
       xAxisLine
     }
     const yOptions = { 
-      plots: config.yAxis.maxPlots,
+      plots,
       chartAttr, 
       yPlotLine, 
       yAxisLine,
@@ -315,6 +316,7 @@ class WChart {
     let chartAttr   = this.chartAttr;
     let minValue    = this.minValue;
     let maxValue    = this.maxValue;
+    let plots       = this.plots;
     let xAxisFormat = config.xAxis.tick.format;
     let yAxisFormat = config.yAxis.tick.format;
     let diff        = startTime - endTime;
@@ -329,8 +331,7 @@ class WChart {
     const yOptions = { 
       format: yAxisFormat,
       minValue, maxValue,
-      chartAttr, yPlotLine, yAxisLine,
-      plots: config.yAxis.maxPlots
+      chartAttr, yPlotLine, yAxisLine, plots
     } 
 
     /**

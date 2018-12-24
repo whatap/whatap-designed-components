@@ -1,3 +1,4 @@
+import { PLOT_STANDARD } from '../meta/globalMeta';
 
 const ttCalcX = (startTime, endTime, startPos, endPos, mousePosX) => {
   let timeDiff  = endTime - startTime;
@@ -39,20 +40,41 @@ const timeToPos = (startTime, endTime, startPos, endPos, time) => {
   return posValue;
 }
 
+const calculatePlots = (height) => {
+  return parseInt(height / PLOT_STANDARD);
+}
+
 /**
  * TODO: `getMaxValue` 관련 로직 수정 필요
  */
-const getMaxValue = (data) => {
-  let current = data;
-  let units = 1;
-  while (parseInt(current / units) !== 0) {
-    units *= 10;
-    current /= 10;
+// const getMaxValue = (data, plots) => {
+//   let current = data;
+//   let units = 1;
+//   while (parseInt(current / units) !== 0) {
+//     units *= 10;
+//     current /= 10;
+//   }
+
+//   let dataDividedByTen = units / 10 > 1 ? units / 10 : 1;
+
+//   return data - (data % dataDividedByTen) + (dataDividedByTen * 5);
+// }
+
+const getMaxValue = (data, plots) => {
+  let current       = plots;
+  let expectedMax   = parseInt(data * 1.1);
+  let beforeDigits  = expectedMax.toString().length - 1;
+  let expectedRound = Math.pow(10, beforeDigits);
+  let threshold     = parseInt(data * 2 / plots);
+
+  for (let i = 0; i < threshold; i++) {
+    current += plots;
+    if (current > expectedMax && current % expectedRound === 0) {
+      break;
+    }
   }
 
-  let dataDividedByTen = units / 10 > 1 ? units / 10 : 1;
-
-  return data - (data % dataDividedByTen) + (dataDividedByTen * 5);
+  return current;
 }
 
-export { ttCalcX, ttCalcY, ttRange, timeToPos, getMaxValue }
+export { ttCalcX, ttCalcY, ttRange, timeToPos, getMaxValue, calculatePlots }
