@@ -2,17 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { ChartCollection, LineChart } from '../Chart'
 
-// ChartWrapper.propTypes = {
-//   id: PropTypes.number.isRequired,
-//   type: PropTypes.oneOf(['LineChart']),
-//   showLegend: PropTypes.bool,
-// }
-// ChartWrapper.defaultProps = {
-//   type: 'LineChart',
-//   showLegend: false,
-//   options: {}
-// }
-
 function objectCompare (object1, object2) {
   // Return if value is not an object
   if (typeof object1 !== 'object') {
@@ -38,7 +27,7 @@ class ChartWrapper extends Component{
 
   componentDidMount() {
     let that = this;
-    const { type, id, colorId, mediator, options, manipulator, data, chartRef } = this.props;
+    const { type, id, colorId, mediator, options, manipulator, data, chartRef, theme, customTheme } = this.props;
 
     this.chart = new ChartCollection[type](id, colorId, options);
 
@@ -54,6 +43,10 @@ class ChartWrapper extends Component{
         this.data = data;
       }
       this.chart.loadData(this.data)
+    }
+
+    if ( customTheme ) {
+      this.chart.addTheme(customTheme);
     }
     
     window.addEventListener("resize", that.resizeCanvas, false);
@@ -73,7 +66,9 @@ class ChartWrapper extends Component{
         clearInterval(that.chartInitSizing);
       } 
     }, 100);
-    
+
+    console.log(theme);
+    this.chart.setTheme(theme);
     this.chart.drawChart();
   }
 
@@ -104,6 +99,10 @@ class ChartWrapper extends Component{
 
     if (!objectCompare(this.props.options, nextProps.options)) {
       this.chart.updateOptions(nextProps.options);
+    }
+
+    if (this.props.theme !== nextProps.theme) {
+      this.chart.setTheme(theme);
     }
 
   }

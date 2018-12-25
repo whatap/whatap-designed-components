@@ -4,7 +4,7 @@ import calculateDiff from '../meta/plotMeta';
 export function drawXplot (ctx, args) {
   let options = args;
   let textWidth = ctx.measureText(options.format).width;
-  let { startTime, endTime, chartAttr, minOffset, xPlotLine } = options;
+  let { startTime, endTime, chartAttr, minOffset, xPlotLine, theme } = options;
   let { x, y, w, h } = chartAttr;
 
   let timeDiff = endTime - startTime;
@@ -23,7 +23,8 @@ export function drawXplot (ctx, args) {
   plots.map((pl) => {
     ctx.beginPath();
     ctx.setLineDash([1, 2]);
-    ctx.strokeStyle = xPlotLine.color;
+    // ctx.strokeStyle = xPlotLine.color;
+    ctx.strokeStyle = theme.plotLine;
     ctx.moveTo(pl, y);
     ctx.lineTo(pl, y + h);
     ctx.stroke();
@@ -33,7 +34,7 @@ export function drawXplot (ctx, args) {
 
 export function drawYplot (ctx, args) {
   let options = args;
-  let { chartAttr, plots, yPlotLine } = options;
+  let { chartAttr, plots, yPlotLine, theme } = options;
   let { x, y, w, h } = chartAttr;
   let heightInterval = h / plots;
 
@@ -41,7 +42,8 @@ export function drawYplot (ctx, args) {
   for (let i = 0; i < plots + 1; i++) {
     ctx.beginPath();
     ctx.setLineDash([1, 2]);
-    ctx.strokeStyle = yPlotLine.color;
+    // ctx.strokeStyle = yPlotLine.color;
+    ctx.strokeStyle = theme.plotLine;
     ctx.moveTo(x, y + (i * heightInterval));
     ctx.lineTo(x + w, y + (i * heightInterval));
     ctx.stroke();
@@ -51,13 +53,14 @@ export function drawYplot (ctx, args) {
 
 export function drawXaxis (ctx, args) {
   let options = args;
-  let { xAxisLine, chartAttr } = options;
+  let { xAxisLine, chartAttr, theme } = options;
   let { x, y, w, h } = chartAttr;
   
   ctx.save();
 
   ctx.beginPath();
-  ctx.strokeStyle = xAxisLine.color;
+  // ctx.strokeStyle = xAxisLine.color;
+  ctx.strokeStyle = theme.axisLine;
   ctx.moveTo(x, y + h);
   ctx.lineTo(x + w, y + h);
   ctx.stroke();
@@ -67,13 +70,14 @@ export function drawXaxis (ctx, args) {
 
 export function drawYaxis (ctx, args) {
   let options = args;
-  let { yAxisLine, chartAttr } = options;
+  let { yAxisLine, chartAttr, theme } = options;
   let { x, y, w, h } = chartAttr;
   
   ctx.save();
 
   ctx.beginPath();
-  ctx.strokeStyle = yAxisLine.color;
+  // ctx.strokeStyle = yAxisLine.color;
+  ctx.strokeStyle = theme.axisLine;
   ctx.moveTo(x, y);
   ctx.lineTo(x, y + h);
   ctx.stroke();

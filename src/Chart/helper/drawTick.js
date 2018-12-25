@@ -7,7 +7,7 @@ const UNIX_TIMESTAMP = 1000;
 
 export function drawXtick (ctx, args) {
   let options = args;
-  let { startTime, endTime, chartAttr, minOffset } = options;
+  let { startTime, endTime, chartAttr, minOffset, theme } = options;
   let { x, y, w, h } = chartAttr;
 
   let textLength = "";
@@ -38,7 +38,7 @@ export function drawXtick (ctx, args) {
     current += interval;
   }
   ctx.save();
-  ctx.fillStyle = "black"
+  ctx.fillStyle = theme.tick;
   ctx.textAlign = "left";
 
   let divisor = 1;
@@ -68,13 +68,13 @@ export function drawXtick (ctx, args) {
  */
 export function drawYtick (ctx, args) {
   let options = args;
-  let { chartAttr, plots, maxValue, minValue, format } = options;
+  let { chartAttr, plots, maxValue, minValue, format, theme } = options;
   let { x, y, w, h } = chartAttr;
   let heightInterval = h / plots;
   let tickValue = maxValue;
 
   ctx.save();
-  ctx.fillStyle = "black";
+  ctx.fillStyle = theme.tick;
   ctx.textAlign = "right";
   for (let i = 0; i < plots + 1; i++) {
     let formattedY = format(tickValue);

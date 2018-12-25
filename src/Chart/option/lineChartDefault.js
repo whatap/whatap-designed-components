@@ -24,7 +24,7 @@ const defaultOptions = {
   },
   yAxis: {
     maxPlots: false,
-    maxValue: 100,
+    maxValue: 10,
     minValue: 0,
     fixedMin: true,
     fixedMax: true,

@@ -64,7 +64,7 @@ const getMaxValue = (data, plots) => {
   let current       = plots;
   let expectedMax   = parseInt(data * 1.1);
   let beforeDigits  = expectedMax.toString().length - 1;
-  let expectedRound = Math.pow(10, beforeDigits);
+  let expectedRound = Math.pow(10, beforeDigits - 1);
   let threshold     = parseInt(data * 2 / plots);
 
   for (let i = 0; i < threshold; i++) {

@@ -12,7 +12,8 @@ import { ttCalcX, ttRange, calculatePlots } from './util/positionCalc';
 import { calculateFormat } from './meta/plotMeta';
 import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X } from './meta/globalMeta';
 import { merge } from 'lodash/object';
-import { drawHelper } from './helper/drawHelper'
+import { drawHelper } from './helper/drawHelper';
+import { colorTheme } from './meta/themeMeta';
 
 /**
  * TODO: 색상 관련 문제 해결 및 Dark Theme 대응 처리
@@ -22,6 +23,7 @@ class WChart {
   constructor(bindId, colorId, options) {
     this.init(bindId, colorId);
     this.initOptions(options);
+    this.setTheme();
     this.initCanvas();
 
     this.initListener();
@@ -68,11 +70,12 @@ class WChart {
   }
 
   init = (bindId, colorId) => {
-    this.chartId = bindId;
-    this.canvas  = document.getElementById(bindId);
-    this.ctx     = this.canvas.getContext("2d");
-    this.data    = new LinkedMap();
-    this.palette = new Palette(colorId);
+    this.chartId      = bindId;
+    this.canvas       = document.getElementById(bindId);
+    this.ctx          = this.canvas.getContext("2d");
+    this.data         = new LinkedMap();
+    this.palette      = new Palette(colorId);
+    this.themePalette = merge({}, colorTheme);
 
     this.chartAttr = {
       x: 0,
@@ -81,6 +84,18 @@ class WChart {
       h: 0,
     }
 		this.dots = [];
+  }
+
+  addTheme = (theme) => {
+    this.themePalette = merge(this.themePalette, theme);
+  }
+
+  setTheme = (theme) => {
+    if (typeof theme === 'undefined' || this.themePalette[theme] === undefined) {
+      theme = 'wh';
+    }
+    this.theme = this.themePalette[theme];
+    console.log(this.theme);
   }
 
   initOptions = (options) => {
@@ -110,6 +125,8 @@ class WChart {
 
     this.ctx.scale(this.ratio, this.ratio);
   }
+
+  
 
   initListener = () => {
     this.tooltip = new Tooltip();
@@ -229,7 +246,7 @@ class WChart {
 
   drawPreBackground = () => {
     this._drawBackground();
-    this._drawPlot();
+    // this._drawPlot();
   }
 
   drawPostBackground = () => {
@@ -317,6 +334,7 @@ class WChart {
     let minValue    = this.minValue;
     let maxValue    = this.maxValue;
     let plots       = this.plots;
+    let theme       = this.theme;
     let xAxisFormat = config.xAxis.tick.format;
     let yAxisFormat = config.yAxis.tick.format;
     let diff        = startTime - endTime;
@@ -326,12 +344,12 @@ class WChart {
     const xOptions = {
       format: xAxisFormat || calculateFormat(diff),
       minOffset: 3,
-      chartAttr, startTime, endTime, xPlotLine, xAxisLine
+      chartAttr, startTime, endTime, xPlotLine, xAxisLine, theme
     }
     const yOptions = { 
       format: yAxisFormat,
       minValue, maxValue,
-      chartAttr, yPlotLine, yAxisLine, plots
+      chartAttr, yPlotLine, yAxisLine, plots, theme
     } 
 
     /**
