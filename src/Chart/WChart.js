@@ -10,7 +10,7 @@ import { getMousePos } from './helper/mouseEvt'
 import ChartMediator from './mediator/ChartMediator';
 import { ttCalcX, ttRange, calculatePlots } from './util/positionCalc';
 import { calculateFormat } from './meta/plotMeta';
-import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X } from './meta/globalMeta';
+import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X, CHART_TICK_SPACE } from './meta/globalMeta';
 import { merge } from 'lodash/object';
 import { drawHelper } from './helper/drawHelper';
 import { colorTheme } from './meta/themeMeta';
@@ -95,7 +95,6 @@ class WChart {
       theme = 'wh';
     }
     this.theme = this.themePalette[theme];
-    console.log(this.theme);
   }
 
   initOptions = (options) => {
@@ -153,6 +152,7 @@ class WChart {
     let config         = this.config;
     let { x, y, w, h } = this.chartAttr;
     let { mx, my }     = mousePos;
+    let { timeDiff }   = config.xAxis;
 
     let textOutput = this.findTooltipData(mousePos);
 
@@ -177,7 +177,7 @@ class WChart {
         endTime: this.endTime,
         maxValue: this.maxValue,
         minValue: this.minValue,
-        xAxisFormat: config.xAxis.tick.format || calculateFormat(diff),
+        xAxisFormat: config.xAxis.tick.format || calculateFormat(timeDiff),
         yAxisFormat: config.yAxis.tick.format,
       });
     }
@@ -200,13 +200,13 @@ class WChart {
     let xEnd      = this.chartAttr.x + this.chartAttr.w;
 
     let timeValue = ttCalcX(startTime, endTime, xStart, xEnd, mx);
-    console.log(timeValue);
+  
 
     let clickRange = 1000;
     if (this.dots.length > 1) {
       clickRange = ttRange(this.dots);
     }
-    console.log(clickRange);
+
 
     let selectedDot;
 		for (let i = 0; i < max; i++) {
@@ -273,8 +273,8 @@ class WChart {
     // ctx.save();
 
     let yAxisMax     = this.config.yAxis.tick.format(this.maxValue);
-    this.chartAttr.x = (config.yAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + CHART_TICK_OFFSET_X : CHART_NON_TICK_OFFSET_X;
-    this.chartAttr.y = (config.xAxis.tick.display) ? 5 : 5;
+    this.chartAttr.x = (config.yAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + CHART_TICK_SPACE + CHART_TICK_OFFSET_X : CHART_NON_TICK_OFFSET_X;
+    this.chartAttr.y = (config.xAxis.tick.display) ? 10 : 10;
     this.chartAttr.w = width - this.chartAttr.x - config.common.offset.right;
     this.chartAttr.h = (config.xAxis.tick.display) ? height - this.chartAttr.y - 20 : height - this.chartAttr.y - 5;
     this.plots       = typeof config.yAxis.maxPlots === "number" ? config.yAxis.maxPlots : calculatePlots(this.chartAttr.h);
@@ -295,12 +295,12 @@ class WChart {
     let plots       = this.plots;
     let xAxisFormat = config.xAxis.tick.format;
     let yAxisFormat = config.yAxis.tick.format;
-    let diff        = startTime - endTime;
-    const { plotLine: xPlotLine, axisLine: xAxisLine } = config.xAxis;
+    let diff        = endTime - startTime;
+    const { plotLine: xPlotLine, axisLine: xAxisLine, timeDiff } = config.xAxis;
     const { plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
 
     const xOptions = {
-      format: xAxisFormat || calculateFormat(diff),
+      format: xAxisFormat || calculateFormat(timeDiff),
       minOffset: 3,
       chartAttr, 
       startTime, 
@@ -337,12 +337,12 @@ class WChart {
     let theme       = this.theme;
     let xAxisFormat = config.xAxis.tick.format;
     let yAxisFormat = config.yAxis.tick.format;
-    let diff        = startTime - endTime;
-    const { plotLine: xPlotLine, axisLine: xAxisLine } = config.xAxis;
+    let diff        = endTime - startTime;
+    const { plotLine: xPlotLine, axisLine: xAxisLine, timeDiff } = config.xAxis;
     const { plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
 
     const xOptions = {
-      format: xAxisFormat || calculateFormat(diff),
+      format: xAxisFormat || calculateFormat(timeDiff),
       minOffset: 3,
       chartAttr, startTime, endTime, xPlotLine, xAxisLine, theme
     }

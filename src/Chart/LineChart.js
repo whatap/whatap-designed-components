@@ -7,7 +7,7 @@ import WChart from './WChart';
 import moment from 'moment';
 import { ttCalcX, ttRange } from './util/positionCalc'
 import { drawTooltipCircle } from './helper/drawTooltip';
-import { TEN_MIN_IN_MILLIS } from './meta/plotMeta';
+import { TEN_MIN_IN_MILLIS, SEC_IN_MILLIS } from './meta/plotMeta';
 import { getMaxValue } from './util/positionCalc';
 
 class LineChart extends WChart{
@@ -28,8 +28,10 @@ class LineChart extends WChart{
     if (fixedMax) this.maxValue = maxValue;
 
     let maxPlotCnt = 0;
-
+    
     if (dataset.length > 0) {
+      let timeLimits = [];
+
       this.data.clear();
       dataset.map((ds, idx) => {
         let colorValue = that.palette.getColorFromId(ds.key);
@@ -60,14 +62,20 @@ class LineChart extends WChart{
          * Only get the initial start time when the option is set to `isFixed=false`
          */
         if (!config.xAxis.isFixed) {
-          that.setTimeStandard(ds.data, idx);
+          let timeStartEnd = that.getStartEndTime(ds.data);
+          timeLimits.push(timeStartEnd);
         }
   
-        if (typeof this.maxPlot === 'undefined') {
-          this.maxPlot = maxPlotCnt;
+        if (typeof that.maxPlot === 'undefined') {
+          that.maxPlot = maxPlotCnt;
         }
         
       })
+
+      if (!config.xAxis.isFixed) {
+        this.setTimeStandard(timeLimits);
+      }
+
     }
     
     this.drawChart();
@@ -153,39 +161,97 @@ class LineChart extends WChart{
     }
   }
 
-
-  setTimeStandard = (data, idx) => {
+  getStartEndTime = (data) => {
     let config = this.config;
-    let { timeDiff } = config.xAxis
+    let { timeDiff } = config.xAxis;
 
-    let current = new Date().getTime();
-    this.endTime = current;
-    this.startTime = current - timeDiff;
-
-    if (idx === 0) {
-      this.dataStartTime = data[0][0];
-      this.dataEndTime = data[0][0];
-    }
+    let dataStartTime = data[0][0];
+    let dataEndTime = data[0][0];
 
     let length = data.length;
-    
-    for (let i = 0; i < length; i++) {
-      if (this.dataStartTime > data[i][0]) {
-        this.dataStartTime = data[i][0];
-      }
-      if (this.dataEndTime < data[i][0]) {
-        this.dataEndTime = data[i][0];
-      }
-    }
+    let interval = timeDiff;
 
-    if (this.startTime < this.dataStartTime) {
-      this.startTime = this.dataStartTime;
+    for (let i = 1; i < length; i++) {
+      if (dataStartTime > data[i][0]) {
+        dataStartTime = data[i][0];
+      }
+      if (dataEndTime < data[i][0]) {
+        dataEndTime = data[i][0];
+      }
+      let plotDiff = data[i][0] - data[i - 1][0];
+      if (plotDiff < interval) {
+        interval = plotDiff
+      }
     }
-    if (this.endTime > this.dataEndTime) {
-      this.endTime = this.dataEndTime;
-    }
-
+    return { start: dataStartTime, end: dataEndTime, plotDiff: interval }
   }
+
+  setTimeStandard = (limits) => {
+    let config = this.config;
+    let { timeDiff } = config.xAxis;
+
+    let length = limits.length;
+    let dataStart = limits[0].start;
+    let dataEnd = limits[0].end;
+    let interval = limits[0].plotDiff;
+
+    for (let i = 1; i < length; i++) {
+      let limit = limits[i];
+      if (dataStart > limit.start) {
+        dataStart = limit.start;
+      }
+      if (dataEnd < limit.end) {
+        dataEnd = limit.end;
+      }
+      if (interval > limit.plotDiff) {
+        interval = limit.plotDiff;
+      }
+    }
+
+    let current = new Date().getTime();
+    this.endTime = current - (current % interval);
+    this.startTime = this.endTime - timeDiff;
+
+    if (this.startTime < dataStart) {
+      this.startTime = dataStart;
+    }
+    if (this.endTime > dataEnd) {
+      this.endTime = dataEnd;
+    }
+    
+  }
+
+  // setTimeStandard = (data, idx) => {
+  //   let config = this.config;
+  //   let { timeDiff } = config.xAxis
+
+  //   if (idx === 0) {
+  //     let current = parseInt(new Date().getTime() / 1000) * 1000;
+  //     this.endTime = current;
+  //     this.startTime = current - timeDiff;
+  //     this.dataStartTime = data[0][0];
+  //     this.dataEndTime = data[0][0];
+  //   }
+
+  //   let length = data.length;
+    
+  //   for (let i = 0; i < length; i++) {
+  //     if (this.dataStartTime > data[i][0]) {
+  //       this.dataStartTime = data[i][0];
+  //     }
+  //     if (this.dataEndTime < data[i][0]) {
+  //       this.dataEndTime = data[i][0];
+  //     }
+  //   }
+
+  //   if (this.startTime < this.dataStartTime) {
+  //     this.startTime = this.dataStartTime;
+  //   }
+  //   if (this.endTime > this.dataEndTime) {
+  //     this.endTime = this.dataEndTime;
+  //   }
+
+  // }
 
   updateData = (dataset) => {
     if (!dataset) return;
@@ -244,6 +310,7 @@ class LineChart extends WChart{
 
     let en = this.data.keys();
     let idx = 0;
+    let timeLimits = [];
     for (let idx = 0; en.hasMoreElements(); idx++) {
       let key = en.nextElement();
       let value = this.data.get(key);
@@ -252,8 +319,11 @@ class LineChart extends WChart{
         let overflow = value.data.length - this.maxPlot;
         value.data = value.data.slice(overflow);
       }
-      that.setTimeStandard(value.data, idx);
+      // that.setTimeStandard(value.data, idx);
+      let timeStartEnd = this.getStartEndTime(value.data);
+      timeLimits.push(timeStartEnd);
     }
+    this.setTimeStandard(timeLimits)
 
     this.drawChart();
   }
@@ -267,6 +337,7 @@ class LineChart extends WChart{
 		let startTime = this.startTime;
     let endTime   = this.endTime;
     let config    = this.config;
+    let theme     = this.theme;
     // const { timeDiff }            = config.xAxis;
     const { disconnectThreshold } = config.common;
     const { x, y, w, h }          = this.chartAttr;
@@ -285,7 +356,7 @@ class LineChart extends WChart{
       for (let i = 0; i < length; i++) {
         let datum = value.data[i];
         if (datum[0] < startTime) continue;
-      
+    
         let xPos = (datum[0]- startTime) / (endTime - startTime);
         let xCoord = x + (w * xPos);
 
@@ -310,7 +381,7 @@ class LineChart extends WChart{
           
           ctx.strokeStyle = value.color;
 					if (this.focused && this.focused.id !== value.id) {
-						ctx.strokeStyle = "rgba(245,245,245,0.5)";
+						ctx.strokeStyle = theme.unselected;
 					}
           ctx.moveTo(xCoord, yCoord);
           lineInit = true;

@@ -1,7 +1,7 @@
 import moment from 'moment';
 import calculateDiff from '../meta/plotMeta'
 import { timeToPos } from '../util/positionCalc';
-import { FONT_SIZE, CHART_TICK_OFFSET_Y } from '../meta/globalMeta'
+import { FONT_SIZE, CHART_TICK_OFFSET_Y, CHART_TICK_SPACE } from '../meta/globalMeta'
 
 const UNIX_TIMESTAMP = 1000;
 
@@ -79,7 +79,7 @@ export function drawYtick (ctx, args) {
   for (let i = 0; i < plots + 1; i++) {
     let formattedY = format(tickValue);
 
-    ctx.fillText(formattedY, x - 2, ( y + 3 ) + (i * heightInterval));
+    ctx.fillText(formattedY, x - CHART_TICK_SPACE, ( y + 3 ) + (i * heightInterval));
     tickValue -= ((maxValue - minValue) / plots);
   }
   ctx.restore();

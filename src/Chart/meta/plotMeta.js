@@ -88,49 +88,49 @@ export default function calculateDiff (diff) {
 }
 
 export function calculateFormat (diff) {
-  if      (diff > MONTH_IN_MILLIS) {
+  if      (diff >= MONTH_IN_MILLIS) {
     return FULL_DATE;
   }
-  else if (diff > SEVEN_DAY_IN_MILLIS) {
+  else if (diff >= SEVEN_DAY_IN_MILLIS) {
     return DATE_HOUR;
   } 
-  else if (diff > THREE_DAY_IN_MILLIS) {
+  else if (diff >= THREE_DAY_IN_MILLIS) {
     return DATE_HOUR;
   }
-  else if (diff > DAY_IN_MILLIS) {
+  else if (diff >= DAY_IN_MILLIS) {
     return DATE_HOUR_MINUTE;
   }
-  else if (diff > TWELVE_HOUR_IN_MILLIS) {
+  else if (diff >= TWELVE_HOUR_IN_MILLIS) {
     return HOUR_MINUTE;
   }
-  else if (diff > SIX_HOUR_IN_MILLIS) {
+  else if (diff >= SIX_HOUR_IN_MILLIS) {
     return HOUR_MINUTE;
   }
-  else if (diff > THREE_HOUR_IN_MILLIS) {
+  else if (diff >= THREE_HOUR_IN_MILLIS) {
     return HOUR_MINUTE;
   }
-  else if (diff > HOUR_IN_MILLIS) {
+  else if (diff >= HOUR_IN_MILLIS) {
     return HOUR_MINUTE
   }
-  else if (diff > THIRTY_MIN_IN_MILLIS) {
-    return FULL_TIME
+  else if (diff >= THIRTY_MIN_IN_MILLIS) {
+    return HOUR_MINUTE
   }
-  else if (diff > TEN_MIN_IN_MILLIS) {
+  else if (diff >= TEN_MIN_IN_MILLIS) {
+    return HOUR_MINUTE;
+  }
+  else if (diff >= FIVE_MIN_IN_MILLIS) {
     return FULL_TIME;
   }
-  else if (diff > FIVE_MIN_IN_MILLIS) {
-    return FULL_TIME;
-  }
-  else if (diff > TWO_MIN_IN_MILLIS) {
+  else if (diff >= TWO_MIN_IN_MILLIS) {
     return MINUTE_SECOND;
   }
-  else if (diff > MIN_IN_MILLIS) {
+  else if (diff >= MIN_IN_MILLIS) {
     return MINUTE_SECOND;
   }
-  else if (diff > THIRTY_SEC_IN_MILLIS) {
+  else if (diff >= THIRTY_SEC_IN_MILLIS) {
     return MINUTE_SECOND;
   }
-  else if (diff > TEN_SEC_IN_MILLIS) {
+  else if (diff >= TEN_SEC_IN_MILLIS) {
     return MINUTE_SECOND;
   }
   else {

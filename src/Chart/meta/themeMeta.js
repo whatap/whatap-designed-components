@@ -6,9 +6,9 @@ export const colorTheme = {
       unselected: "rgba(245,245,245,0.5)",
     },
     'bk': {
-      plotLine: '#ffffff',
-      axisLine: '#ffffff',
+      plotLine: '#3f3f3f',
+      axisLine: '#C4C4C4',
       tick: '#ffffff',
-      unselected: "rgba(245,245,245,0.5)",
+      unselected: "rgba(245,245,245,0.1)",
     }
 }
