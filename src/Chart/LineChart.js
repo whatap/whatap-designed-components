@@ -34,7 +34,8 @@ class LineChart extends WChart{
 
       this.data.clear();
       dataset.map((ds, idx) => {
-        let colorValue = that.palette.getColorFromId(ds.key);
+        console.log(that.palette);
+        let colorValue = that.palette.getColorFromId(ds.id);
   
         /**
          * Sorts the inner data in ascending order.
@@ -303,7 +304,7 @@ class LineChart extends WChart{
 
         that.heapSort.sort(cData.data, false, 0);
       } else {
-        let colorValue = that.palette.getColorFromId(ds.key);
+        let colorValue = that.palette.getColorFromId(ds.id);
         that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data1, color: colorValue });
       }
     })

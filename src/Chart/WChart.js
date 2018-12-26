@@ -14,6 +14,7 @@ import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X, CHA
 import { merge } from 'lodash/object';
 import { drawHelper } from './helper/drawHelper';
 import { colorTheme } from './meta/themeMeta';
+import ColorSelector from './helper/ColorSelector';
 
 /**
  * TODO: 색상 관련 문제 해결 및 Dark Theme 대응 처리
@@ -36,7 +37,11 @@ class WChart {
   notifyMediator = (action, func, arg) => {
     if (typeof this.mediator !== 'undefined' 
     && typeof this.mediator[action] !== 'undefined') {
-      this.mediator[action](func, arg);
+      try {
+        this.mediator[action](func, arg);
+      } catch (e) {
+        console.log("mediator not defined");
+      }
     }
   }
 
@@ -74,7 +79,13 @@ class WChart {
     this.canvas       = document.getElementById(bindId);
     this.ctx          = this.canvas.getContext("2d");
     this.data         = new LinkedMap();
-    this.palette      = new Palette(colorId);
+    // this.palette      = new Palette(colorId);
+    this.palette      = ColorSelector;
+
+    let that = this;
+
+    console.log(ColorSelector)
+    console.log(this.palette);
     this.themePalette = merge({}, colorTheme);
 
     this.chartAttr = {
@@ -136,11 +147,14 @@ class WChart {
   }
 
   handleMouseOver = (evt) => {
+    let canvas   = this.canvas;
+    let ctx      = this.ctx;
     let mousePos = getMousePos(evt, this.overrideClientRect());
     
     let textOutput = this.findTooltipData(mousePos);
 
     if (textOutput !== null) {
+      canvas.style.cursor = "pointer";
       this.mouseFollow = true;
       this.tooltip.append(evt, textOutput);
     }
@@ -148,6 +162,7 @@ class WChart {
 
   handleMouseMove = (evt) => {
     let mousePos       = getMousePos(evt, this.overrideClientRect());
+    let canvas         = this.canvas;
     let ctx            = this.ctx;
     let config         = this.config;
     let { x, y, w, h } = this.chartAttr;
@@ -157,6 +172,7 @@ class WChart {
     let textOutput = this.findTooltipData(mousePos);
 
     if (textOutput !== null) {
+      canvas.style.cursor = "pointer";
       this.mouseFollow = true;
       if (this.tooltip.tooltipOn) {
         this.tooltip.follow(evt, textOutput);
@@ -184,6 +200,8 @@ class WChart {
   }
 
   handleMouseOut = (evt) => {
+    let canvas = this.canvas;
+    canvas.style.cursor = "default";
     this.mouseFollow = false;
     this.tooltip.remove();
 
@@ -198,6 +216,7 @@ class WChart {
     let endTime   = this.endTime;
     let xStart    = this.chartAttr.x;
     let xEnd      = this.chartAttr.x + this.chartAttr.w;
+    let mediator  = this.mediator;
 
     let timeValue = ttCalcX(startTime, endTime, xStart, xEnd, mx);
   
@@ -218,7 +237,9 @@ class WChart {
 			}
 		}
     this.drawSelected(selectedDot);
-    this.notifyMediator("clicked", "drawSelected", selectedDot);
+    if ( mediator ) {
+      this.notifyMediator("clicked", "drawSelected", selectedDot);
+    }
   }
 
   findTooltipData = (pos) => {
@@ -371,14 +392,23 @@ class WChart {
     if (config.yAxis.axisLine.display) drawYaxis(ctx, yOptions);
   }
 
-  resizeCanvas = (element) => {
+  resizeCanvas = (element, fixedHeight) => {
     if (!element) {
       element = this.overrideClientRect();
     }
-    this.bcRect = {
-      ...this.bcRect,
-      width: element.clientWidth,
-      height: element.clientHeight,
+
+    if (!fixedHeight) {
+      this.bcRect = {
+        ...this.bcRect,
+        width: element.clientWidth,
+        height: element.clientHeight,
+      }
+    } else {
+      this.bcRect = {
+        ...this.bcRect,
+        width: element.clientWidth,
+        height: Number(fixedHeight),
+      }
     }
 
     this.setDpiSupport();

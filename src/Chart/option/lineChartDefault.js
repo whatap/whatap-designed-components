@@ -40,7 +40,7 @@ const defaultOptions = {
       display: true,
       color: '#000000',
       format: function (d) {
-        return d.toFixed(0);
+        return d > 0 ? d.toFixed(0) : 0;
       }
     }
   },

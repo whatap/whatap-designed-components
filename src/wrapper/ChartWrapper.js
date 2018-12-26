@@ -108,8 +108,9 @@ class ChartWrapper extends Component{
   }
 
   resizeCanvas = () => {
+    const { cvHeight } = this.props;
     // this.chart.resizeCanvasWithSize(size.width, size.height);
-    this.chart.resizeCanvas(this.mainDiv);
+    this.chart.resizeCanvas(this.mainDiv, cvHeight);
     this.chart.drawChart();
   }
 
