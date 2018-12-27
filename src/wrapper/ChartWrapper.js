@@ -102,8 +102,10 @@ class ChartWrapper extends Component{
     }
 
     if (this.props.theme !== nextProps.theme) {
-      this.chart.setTheme(theme);
+      this.chart.setTheme(nextProps.theme, true);
     }
+
+    return false;
 
   }
 

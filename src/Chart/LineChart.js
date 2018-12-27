@@ -5,7 +5,7 @@
  */
 import WChart from './WChart';
 import moment from 'moment';
-import { ttCalcX, ttRange } from './util/positionCalc'
+import { tooltipCalcX, tooltipRange } from './util/positionCalc'
 import { drawTooltipCircle } from './helper/drawTooltip';
 import { TEN_MIN_IN_MILLIS, SEC_IN_MILLIS } from './meta/plotMeta';
 import { getMaxValue } from './util/positionCalc';
@@ -24,8 +24,8 @@ class LineChart extends WChart{
     this.maxPlot  = config.xAxis.maxPlot;
     const { minValue, maxValue, fixedMin, fixedMax }  = config.yAxis;
     
-    if (fixedMin) this.minValue = minValue;
-    if (fixedMax) this.maxValue = maxValue;
+    this.minValue = minValue;
+    this.maxValue = maxValue;
 
     let maxPlotCnt = 0;
     
@@ -34,7 +34,6 @@ class LineChart extends WChart{
 
       this.data.clear();
       dataset.map((ds, idx) => {
-        console.log(that.palette);
         let colorValue = that.palette.getColorFromId(ds.id);
   
         /**
@@ -76,7 +75,6 @@ class LineChart extends WChart{
       if (!config.xAxis.isFixed) {
         this.setTimeStandard(timeLimits);
       }
-
     }
     
     this.drawChart();
@@ -92,17 +90,17 @@ class LineChart extends WChart{
     let xEnd      = this.chartAttr.x + this.chartAttr.w;
     let config    = this.config;
 
-    let timeValue = ttCalcX(startTime, endTime, xStart, xEnd, mx);
+    let timeValue = tooltipCalcX(startTime, endTime, xStart, xEnd, mx);
 
-    let tooltipRange = 1000;
+    let ttRange = 1000;
     if (this.dots.length > 1) {
-      tooltipRange = ttRange(this.dots);
+      ttRange = tooltipRange(this.dots);
     }
 
     let tooltipList = [];
 		for (let i = 0; i < this.dots.length; i++) {
 			let dot = this.dots[i];
-      if (dot.time > timeValue - (tooltipRange / 2) && dot.time < timeValue + (tooltipRange / 2)) {
+      if (dot.time > timeValue - (ttRange / 2) && dot.time < timeValue + (ttRange / 2)) {
         tooltipList.push(dot);
       }
     }

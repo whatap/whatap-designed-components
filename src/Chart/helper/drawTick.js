@@ -77,6 +77,7 @@ export function drawYtick (ctx, args) {
   ctx.fillStyle = theme.tick;
   ctx.textAlign = "right";
   for (let i = 0; i < plots + 1; i++) {
+    tickValue = Math.abs(tickValue);
     let formattedY = format(tickValue);
 
     ctx.fillText(formattedY, x - CHART_TICK_SPACE, ( y + 3 ) + (i * heightInterval));

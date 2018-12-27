@@ -8,7 +8,7 @@ import Tooltip, { drawTooltipCircle } from './helper/drawTooltip';
 import moment from 'moment';
 import { getMousePos } from './helper/mouseEvt'
 import ChartMediator from './mediator/ChartMediator';
-import { ttCalcX, ttRange, calculatePlots } from './util/positionCalc';
+import { tooltipCalcX, tooltipRange, calculatePlots } from './util/positionCalc';
 import { calculateFormat } from './meta/plotMeta';
 import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X, CHART_TICK_SPACE } from './meta/globalMeta';
 import { merge } from 'lodash/object';
@@ -101,11 +101,15 @@ class WChart {
     this.themePalette = merge(this.themePalette, theme);
   }
 
-  setTheme = (theme) => {
+  setTheme = (theme, override=false) => {
     if (typeof theme === 'undefined' || this.themePalette[theme] === undefined) {
       theme = 'wh';
     }
     this.theme = this.themePalette[theme];
+
+    if (override) {
+      this.drawChart();
+    }
   }
 
   initOptions = (options) => {
@@ -218,12 +222,12 @@ class WChart {
     let xEnd      = this.chartAttr.x + this.chartAttr.w;
     let mediator  = this.mediator;
 
-    let timeValue = ttCalcX(startTime, endTime, xStart, xEnd, mx);
+    let timeValue = tooltipCalcX(startTime, endTime, xStart, xEnd, mx);
   
 
     let clickRange = 1000;
     if (this.dots.length > 1) {
-      clickRange = ttRange(this.dots);
+      clickRange = tooltipRange(this.dots);
     }
 
 
@@ -294,10 +298,10 @@ class WChart {
     // ctx.save();
 
     let yAxisMax     = this.config.yAxis.tick.format(this.maxValue);
-    this.chartAttr.x = (config.yAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + CHART_TICK_SPACE + CHART_TICK_OFFSET_X : CHART_NON_TICK_OFFSET_X;
-    this.chartAttr.y = (config.xAxis.tick.display) ? 10 : 10;
+    this.chartAttr.x = (config.yAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + CHART_TICK_SPACE + CHART_TICK_OFFSET_X + config.common.offset.left : CHART_NON_TICK_OFFSET_X + config.common.offset.left;
+    this.chartAttr.y = (config.xAxis.tick.display) ? 10 + config.common.offset.top : 10 + config.common.offset.top;
     this.chartAttr.w = width - this.chartAttr.x - config.common.offset.right;
-    this.chartAttr.h = (config.xAxis.tick.display) ? height - this.chartAttr.y - 20 : height - this.chartAttr.y - 5;
+    this.chartAttr.h = (config.xAxis.tick.display) ? height - this.chartAttr.y - 20 - config.common.offset.bottom : height - this.chartAttr.y - 5 - config.common.offset.bottom;
     this.plots       = typeof config.yAxis.maxPlots === "number" ? config.yAxis.maxPlots : calculatePlots(this.chartAttr.h);
 
     ctx.fillStyle = "rgba(0,0,0,0)";

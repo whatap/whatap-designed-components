@@ -1,4 +1,4 @@
-import { ttCalcX, ttCalcY } from '../util/positionCalc'
+import { tooltipCalcX, tooltipCalcY } from '../util/positionCalc'
 import { FONT_SIZE, CHART_TICK_OFFSET_Y, CHART_TICK_OFFSET_X } from '../meta/globalMeta';
 
 export function drawHelper (ctx, chartAttr, mousePos, args) {
@@ -22,7 +22,7 @@ export function drawHelper (ctx, chartAttr, mousePos, args) {
     ctx.lineTo(mx, y + h);
     ctx.stroke();
 
-    let timeValue   = ttCalcX(startTime, endTime, x, x + w, mx);
+    let timeValue   = tooltipCalcX(startTime, endTime, x, x + w, mx);
     ctx.strokeStyle = "black";
     ctx.fillStyle   = "white";
     let formattedX  = xAxisFormat(timeValue / 1000)
@@ -34,7 +34,7 @@ export function drawHelper (ctx, chartAttr, mousePos, args) {
     ctx.textAlign   = "left";
     ctx.fillText(formattedX, mx - textWidthX / 2 + 1, y + h + FONT_SIZE + CHART_TICK_OFFSET_Y);
 
-    let dataValue   = ttCalcY(minValue, maxValue, y, y + h, my);
+    let dataValue   = tooltipCalcY(minValue, maxValue, y, y + h, my);
     ctx.strokeStyle = "black";
     ctx.fillStyle   = "white";
     let formattedY  = yAxisFormat(parseInt(dataValue));

@@ -26,7 +26,6 @@ class ColorSelector {
     if (key === -1) return nonInstanceColor.hex;
 
     let current = Math.abs(key) % defaultPalette.length;
-    console.log(current);
     let color   = this.colorList[current];
 
     if (color && color.list.includes(key)) {

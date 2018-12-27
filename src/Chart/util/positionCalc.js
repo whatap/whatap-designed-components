@@ -1,6 +1,6 @@
 import { PLOT_STANDARD } from '../meta/globalMeta';
 
-const ttCalcX = (startTime, endTime, startPos, endPos, mousePosX) => {
+const tooltipCalcX = (startTime, endTime, startPos, endPos, mousePosX) => {
   let timeDiff  = endTime - startTime;
   let posDiff   = endPos - startPos;
   let timeValue = (timeDiff * (mousePosX - startPos)) / posDiff + startTime;
@@ -8,7 +8,7 @@ const ttCalcX = (startTime, endTime, startPos, endPos, mousePosX) => {
   return parseInt(timeValue);
 }
 
-const ttCalcY = (minValue, maxValue, startPos, endPos, mousePosY) => {
+const tooltipCalcY = (minValue, maxValue, startPos, endPos, mousePosY) => {
   let valueDiff = maxValue - minValue;
   let posDiff   = endPos - startPos;
   let value     = maxValue - (valueDiff * (mousePosY - startPos) / posDiff );
@@ -16,19 +16,19 @@ const ttCalcY = (minValue, maxValue, startPos, endPos, mousePosY) => {
   return value;
 }
 
-const ttRange = (dots) => {
-  let minimumTtRange = dots[1].time - dots[0].time;
+const tooltipRange = (dots) => {
+  let minimumtooltipRange = dots[1].time - dots[0].time;
   
   for (let i = 2; i < dots.length; i++) {
-    let currentTtRange = dots[i].time - dots[i - 1].time;
-    if (currentTtRange > 0) {
-      if (currentTtRange < minimumTtRange) {
-        minimumTtRange = currentTtRange;
+    let currenttooltipRange = dots[i].time - dots[i - 1].time;
+    if (currenttooltipRange > 0) {
+      if (currenttooltipRange < minimumtooltipRange) {
+        minimumtooltipRange = currenttooltipRange;
       }  
     }
   }
 
-  return minimumTtRange;
+  return minimumtooltipRange;
 }
 
 const timeToPos = (startTime, endTime, startPos, endPos, time) => {
@@ -44,27 +44,15 @@ const calculatePlots = (height) => {
   return parseInt(height / PLOT_STANDARD);
 }
 
-/**
- * TODO: `getMaxValue` 관련 로직 수정 필요
- */
-// const getMaxValue = (data, plots) => {
-//   let current = data;
-//   let units = 1;
-//   while (parseInt(current / units) !== 0) {
-//     units *= 10;
-//     current /= 10;
-//   }
-
-//   let dataDividedByTen = units / 10 > 1 ? units / 10 : 1;
-
-//   return data - (data % dataDividedByTen) + (dataDividedByTen * 5);
-// }
-
 const getMaxValue = (data, plots) => {
   let current       = plots;
   let expectedMax   = parseInt(data * 1.1);
-  let beforeDigits  = expectedMax.toString().length - 1;
-  let expectedRound = Math.pow(10, beforeDigits - 1);
+  let maxDigits  = expectedMax.toString().length - 1;
+  /**
+   * 네 자리 이상의 경우, 처리 단위를 올린다.
+   */
+  let roundDigits = maxDigits > 4 ? maxDigits : maxDigits - 1;
+  let expectedRound = Math.pow(10, roundDigits);
   let threshold     = parseInt(data * 2 / plots);
 
   for (let i = 0; i < threshold; i++) {
@@ -77,4 +65,4 @@ const getMaxValue = (data, plots) => {
   return current;
 }
 
-export { ttCalcX, ttCalcY, ttRange, timeToPos, getMaxValue, calculatePlots }
+export { tooltipCalcX, tooltipCalcY, tooltipRange, timeToPos, getMaxValue, calculatePlots }
