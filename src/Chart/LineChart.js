@@ -61,7 +61,7 @@ class LineChart extends WChart{
         /**
          * Only get the initial start time when the option is set to `isFixed=false`
          */
-        if (!config.xAxis.isFixed) {
+        if (!config.xAxis.isFixed && ds.data.length > 0) {
           let timeStartEnd = that.getStartEndTime(ds.data);
           timeLimits.push(timeStartEnd);
         }
@@ -72,7 +72,7 @@ class LineChart extends WChart{
         
       })
 
-      if (!config.xAxis.isFixed) {
+      if (!config.xAxis.isFixed && timeLimits.length > 0) {
         this.setTimeStandard(timeLimits);
       }
     }
@@ -377,10 +377,15 @@ class LineChart extends WChart{
         value.data = value.data.slice(overflow);
       }
       // that.setTimeStandard(value.data, idx);
-      let timeStartEnd = this.getStartEndTime(value.data);
-      timeLimits.push(timeStartEnd);
+      if (value.data.length > 0) {
+        let timeStartEnd = this.getStartEndTime(value.data);
+        timeLimits.push(timeStartEnd);
+      }
     }
-    this.setTimeStandard(timeLimits)
+
+    if (timeLimits.length > 0) {
+      this.setTimeStandard(timeLimits)
+    }
 
     this.drawChart();
   }
@@ -427,7 +432,7 @@ class LineChart extends WChart{
             yPos = 1 - (datum[1] - this.minValue) / (this.maxValue - this.minValue);
           }
         } else {
-          yPos = 0.99;
+          yPos = 0.999;
         }
         let yCoord = y + (h * yPos);
 

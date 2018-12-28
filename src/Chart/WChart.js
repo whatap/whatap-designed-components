@@ -85,8 +85,6 @@ class WChart {
 
     let that = this;
 
-    console.log(ColorSelector)
-    console.log(this.palette);
     this.themePalette = merge({}, colorTheme);
 
     this.chartAttr = {
@@ -272,9 +270,25 @@ class WChart {
   }
 
   drawChart = () => {
-    this.drawPreBackground();
-    this.drawData();
-    this.drawPostBackground();
+    let validated = this.dataValidation();
+
+    if (validated) {
+      this.drawPreBackground();
+      this.drawData();
+      this.drawPostBackground();
+    }
+  }
+
+  dataValidation = () => {
+    let startTime = this.startTime;
+    let endTime   = this.endTime;
+
+    if (startTime > endTime) {
+      console.log("timestamp incorrect: " + startTime + " / " + endTime);
+      return false;
+    }
+
+    return true;
   }
 
   drawData = () => {

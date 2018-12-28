@@ -67,7 +67,6 @@ class ChartWrapper extends Component{
       } 
     }, 100);
 
-    console.log(theme);
     this.chart.setTheme(theme);
     this.chart.drawChart();
   }
