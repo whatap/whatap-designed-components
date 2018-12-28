@@ -79,8 +79,9 @@ class WChart {
     this.canvas       = document.getElementById(bindId);
     this.ctx          = this.canvas.getContext("2d");
     this.data         = new LinkedMap();
-    // this.palette      = new Palette(colorId);
     this.palette      = ColorSelector;
+    this.plotPoint    = true;
+    this.hoveredPlots = [];
 
     let that = this;
 
@@ -156,11 +157,16 @@ class WChart {
     let mousePos = getMousePos(evt, this.overrideClientRect());
     
     let textOutput = this.findTooltipData(mousePos);
+    let plotOutput = this.findPlotPoint(mousePos);
 
     if (textOutput !== null) {
       canvas.style.cursor = "pointer";
       this.mouseFollow = true;
       this.tooltip.append(evt, textOutput);
+    }
+
+    if (plotOutput) {
+      this.plotPoint = true;
     }
   }
 
@@ -174,6 +180,7 @@ class WChart {
     let { timeDiff }   = config.xAxis;
 
     let textOutput = this.findTooltipData(mousePos);
+    let plotOutput = this.findPlotPoint(mousePos);
 
     if (textOutput !== null) {
       canvas.style.cursor = "pointer";
@@ -187,6 +194,10 @@ class WChart {
       if (!this.mouseFollow) {
         this.tooltip.remove();
       }
+    }
+
+    if (plotOutput) {
+      this.plotPoint = true;
     }
 
     this.drawChart();
@@ -208,6 +219,8 @@ class WChart {
     canvas.style.cursor = "default";
     this.mouseFollow = false;
     this.tooltip.remove();
+
+    this.hoveredPlots = false;
 
     this.drawChart();
   }
@@ -247,6 +260,10 @@ class WChart {
   }
 
   findTooltipData = (pos) => {
+    throw new Error("WChart cannot be instantiated. Please extend this class to utilize it");
+  }
+
+  findPlotPoint = (pos) => {
     throw new Error("WChart cannot be instantiated. Please extend this class to utilize it");
   }
 

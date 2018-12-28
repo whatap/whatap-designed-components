@@ -45,10 +45,10 @@ class LineChart extends WChart{
          * If not fixed Minimum / Maximum value, evaluate the data within and decide the max/min value
          */
         ds.data.map((data) => {
-          if (!fixedMax && data[1] > that.maxValue ) {
+          if (!fixedMax && typeof data[1] === 'number' && data[1] > that.maxValue ) {
             that.maxValue = getMaxValue(data[1], plots)
           } 
-          if (!fixedMin && data[1] < that.minValue) {
+          if (!fixedMin && typeof data[1] === 'number' && data[1] < that.minValue) {
             that.minValue = data[1];
           }
         })
@@ -113,19 +113,27 @@ class LineChart extends WChart{
     }
 
 		if (tooltipList.length !== 0) {
-      let maxTooltipWidth = 0;
-      let timestamp = `<div>${config.tooltip.time.format(tooltipList[0].time)}</div>`;
+      let timestamp = config.tooltip.time.format(tooltipList[0].time);
+      let maxTooltipWidth = parseInt(ctx.measureText(timestamp).width) || 0;
+      let maxLabelWidth = 0;
+      let maxValueWidth = 0;
 
       let list = tooltipList.map((ttl, idx) => {
         let tooltipWidth = 0;
+        let labelWidth = 0;
+        let valueWidth = 0;
         if (ttl.label) {
-          tooltipWidth = parseInt(ctx.measureText(`${ttl.label}: ${ttl.value.toFixed(1)}`).width);
-        } else {
-          tooltipWidth = parseInt(ctx.measureText(`${ttl.value.toFixed(1)}`).width);
-        }
-        if (tooltipWidth > maxTooltipWidth) {
-          maxTooltipWidth = tooltipWidth;
-        }
+          // tooltipWidth = parseInt(ctx.measureText(`${ttl.label}: ${ttl.value.toFixed(1)}`).width);
+          labelWidth = parseInt(ctx.measureText(`${ttl.label}`).width);
+        } 
+        // else {
+          // tooltipWidth = parseInt(ctx.measureText(`${ttl.value.toFixed(1)}`).width);
+        // }
+        valueWidth = parseInt(ctx.measureText(`${ttl.value.toFixed(1)}`).width);
+        tooltipWidth = labelWidth + valueWidth;
+        if (labelWidth > maxLabelWidth)     maxLabelWidth   = labelWidth;
+        if (valueWidth > maxValueWidth)     maxValueWidth   = valueWidth;
+        if (tooltipWidth > maxTooltipWidth) maxTooltipWidth = tooltipWidth;
 
         return {
           label: ttl.label,
@@ -139,17 +147,25 @@ class LineChart extends WChart{
       if (listLength >= 15) {
         listColumns = Math.ceil(listLength / 15);
       }
+      let timeEl = `<div style='width: ${maxTooltipWidth + 20}px; text-align: center; padding-left: 1px; padding-right: 1px;'>${timestamp}</div>`;
       
       let textOutput = "<div><div style='display: block'>";
-      textOutput += timestamp;
+      textOutput += timeEl;
 			list.map((ttl, idx) => {
-        if (idx !== 0 && idx % listColumns === 0) {
-          textOutput += "</div><div style='display: block'>";
-        }
-        let out = `<div style='display: inline-block; width: ${maxTooltipWidth + 40}px;'>
-                    ${ttl.colorLabel} ${ttl.label ? ttl.label + ': ' : ''}
-                    ${config.tooltip.value.format(ttl.value)}
-                   </div>`;
+        // if (idx !== 0 && idx % listColumns === 0) {
+        //   textOutput += "</div><div style='display: block; padding: 2px;'>";
+        // }
+        let out = `<div style='width: ${maxTooltipWidth + 20}px; text-align: center; padding-left: 1px; padding-right: 1px;'>
+                    ${ttl.colorLabel} 
+                    ${ttl.label 
+                      ? `<div style='display: inline-block; width: ${maxLabelWidth}; text-align: left;'>
+                          ${ttl.label}: 
+                        </div>` 
+                      : `<div style='display: inline-block;'></div>`}
+                    <div style='display: inline-block; width: ${maxValueWidth}; text-align: left;'>
+                      ${config.tooltip.value.format(ttl.value)}  
+                    </div>
+                  </div>`;
 				textOutput += out;
       });
       textOutput += "</div></div>";
@@ -157,6 +173,48 @@ class LineChart extends WChart{
       return textOutput;
 		} else {
       return null;
+    }
+  }
+
+  findPlotPoint = (pos) => {
+    const { mx, my } = pos;
+    let that      = this;
+    let ctx       = this.ctx;
+    let startTime = this.startTime;
+    let endTime   = this.endTime;
+    let xStart    = this.chartAttr.x;
+    let xEnd      = this.chartAttr.x + this.chartAttr.w;
+    let config    = this.config;
+    let plotPoint = this.plotPoint;
+
+    let timeValue = tooltipCalcX(startTime, endTime, xStart, xEnd, mx);
+
+    let ttRange = 1000;
+    if (this.dots.length > 1) {
+      ttRange = tooltipRange(this.dots);
+    }
+
+    let tooltipList = [];
+		for (let i = 0; i < this.dots.length; i++) {
+			let dot = this.dots[i];
+      if (dot.time > timeValue - (ttRange / 2) && dot.time < timeValue + (ttRange / 2)) {
+        tooltipList.push(dot);
+      }
+    }
+    
+    if (this.focused) {
+      let currentDot = tooltipList.find((el) => {
+        return that.focused.id === el.id
+      })
+      tooltipList = [currentDot];
+    }
+
+    if (tooltipList.length !== 0) {
+      this.hoveredPlots = tooltipList;
+      return true;
+    } else {
+      this.hoveredPlots = [];
+      return false;
     }
   }
 
@@ -331,12 +389,14 @@ class LineChart extends WChart{
    * @private
    */
   drawData = () => {
-    let that      = this;
-    let ctx       = this.ctx;
-		let startTime = this.startTime;
-    let endTime   = this.endTime;
-    let config    = this.config;
-    let theme     = this.theme;
+    let that         = this;
+    let ctx          = this.ctx;
+		let startTime    = this.startTime;
+    let endTime      = this.endTime;
+    let config       = this.config;
+    let theme        = this.theme;
+    let plotPoint    = this.plotPoint;
+    let hoveredPlots = this.hoveredPlots;
     // const { timeDiff }            = config.xAxis;
     const { disconnectThreshold } = config.common;
     const { x, y, w, h }          = this.chartAttr;
@@ -417,8 +477,22 @@ class LineChart extends WChart{
         
       // })
     }
+
+    if (plotPoint && hoveredPlots.length > 0) {
+      hoveredPlots.map((pl) => {
+        ctx.beginPath();
+        ctx.arc(pl.x, pl.y, pl.r, 0, 2 * Math.PI);
+        ctx.fillStyle = pl.color;
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke();
+      })
+    }
+
     this.dots = _dots;
     ctx.restore();
+
   }
 }
 
