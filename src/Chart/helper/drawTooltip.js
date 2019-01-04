@@ -1,4 +1,4 @@
-const style = 'border: none; display: block; float: left; width: 6px; height: 6x; margin-right: 5px; margin-top: 0px;';
+const defaultStyle = 'border: none; display: block; float: left; width: 6px; height: 6x; margin-right: 5px; margin-top: 0px;';
 
 export function createStyle(x, y, width, options) {
   let innerStyle = {
@@ -28,8 +28,8 @@ export function createStyle(x, y, width, options) {
   return output;
 }
 
-export function drawTooltipCircle(color, style=style) {
-  var circle = '<span style="' + style + '"><svg height="8" width="8">'
+export function drawTooltipCircle(color) {
+  var circle = '<span><svg height="8" width="8">'
   circle += '<circle cx="4" cy="4" r="4" fill="' + color + '" />'
   circle += '</svg></span>'
   return circle

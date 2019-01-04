@@ -48,6 +48,7 @@ const getMaxValue = (data, plots) => {
   let current       = plots;
   let expectedMax   = parseInt(data * 1.1);
   let maxDigits  = expectedMax.toString().length - 1;
+
   /**
    * 네 자리 이상의 경우, 처리 단위를 올린다.
    */
@@ -64,5 +65,6 @@ const getMaxValue = (data, plots) => {
 
   return current;
 }
+
 
 export { tooltipCalcX, tooltipCalcY, tooltipRange, timeToPos, getMaxValue, calculatePlots }

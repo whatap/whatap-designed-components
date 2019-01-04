@@ -67,6 +67,7 @@ const defaultOptions = {
       bottom: 0,
     },
     drawHelper: false,
+    area: false,
   }
 }
 

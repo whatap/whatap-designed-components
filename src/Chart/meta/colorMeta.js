@@ -21,5 +21,5 @@ export const defaultPalette = [
 ]
 
 export const nonInstanceColor = {
-  color: 'purple', hex: '#800080', rgb: [128, 0, 128]
+  color: 'blue', hex: '#5FB3F4', rgb: [95, 179, 244]
 }

@@ -9,6 +9,7 @@ import { tooltipCalcX, tooltipRange } from './util/positionCalc'
 import { drawTooltipCircle } from './helper/drawTooltip';
 import { TEN_MIN_IN_MILLIS, SEC_IN_MILLIS } from './meta/plotMeta';
 import { getMaxValue } from './util/positionCalc';
+import { CoreFunc } from '../core';
 
 class LineChart extends WChart{
   constructor(bindId, colorId, options) {
@@ -16,7 +17,7 @@ class LineChart extends WChart{
   }
 
   loadData = (dataset) => {
-    if (!dataset) return;
+    if (!dataset && dataset.length === 0) return;
 
     let that      = this;
     let config    = this.config;
@@ -35,6 +36,8 @@ class LineChart extends WChart{
       this.data.clear();
       dataset.map((ds, idx) => {
         let colorValue = that.palette.getColorFromId(ds.id);
+        let strokeValue = CoreFunc.formatRgb(colorValue);
+        let fillValue = CoreFunc.formatRgb(colorValue, 0.2);
   
         /**
          * Sorts the inner data in ascending order.
@@ -57,12 +60,12 @@ class LineChart extends WChart{
           maxPlotCnt = ds.data.length;
         }
   
-        that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data, color: colorValue });
+        that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data, color: strokeValue, fill: fillValue });
         /**
          * Only get the initial start time when the option is set to `isFixed=false`
          */
         if (!config.xAxis.isFixed && ds.data.length > 0) {
-          let timeStartEnd = that.getStartEndTime(ds.data);
+          let timeStartEnd = that.getStartEndTime(ds.data, true);
           timeLimits.push(timeStartEnd);
         }
   
@@ -142,33 +145,44 @@ class LineChart extends WChart{
         }
       })
     
-      let listLength = list.length;
-      let listColumns = 1;
-      if (listLength >= 15) {
-        listColumns = Math.ceil(listLength / 15);
-      }
-      let timeEl = `<div style='width: ${maxTooltipWidth + 20}px; text-align: center; padding-left: 1px; padding-right: 1px;'>${timestamp}</div>`;
+      let timeEl = `<div style='display: block; text-align: center; padding-left: 1px; padding-right: 1px;'>${timestamp}</div>`;
       
-      let textOutput = "<div><div style='display: block'>";
+      let textOutput = "<div>";
       textOutput += timeEl;
-			list.map((ttl, idx) => {
-        // if (idx !== 0 && idx % listColumns === 0) {
-        //   textOutput += "</div><div style='display: block; padding: 2px;'>";
-        // }
-        let out = `<div style='width: ${maxTooltipWidth + 20}px; text-align: center; padding-left: 1px; padding-right: 1px;'>
+
+      let length = list.length;
+      const ROW_COUNT = 15;
+      let columns = Math.ceil(length / ROW_COUNT);
+      let widthRatio = 100 / columns;
+      textOutput += `<div style='display: flex; width: ${(maxTooltipWidth + 20) * columns}px;'>`;
+
+      for (let i = 0; i < length; i++) {
+        let ttl = list[i];
+        
+        if (i % ROW_COUNT === 0) {
+          textOutput += `<div style='display: inline-block; width: ${widthRatio}%;'>`;
+        }
+
+        let out = `<div style='text-align: center; padding-left: 1px; padding-right: 1px;'>
                     ${ttl.colorLabel} 
                     ${ttl.label 
-                      ? `<div style='display: inline-block; width: ${maxLabelWidth}; text-align: left;'>
+                      ? `<span style='width: ${maxLabelWidth}; text-align: left;'>
                           ${ttl.label}: 
-                        </div>` 
-                      : `<div style='display: inline-block;'></div>`}
-                    <div style='display: inline-block; width: ${maxValueWidth}; text-align: left;'>
+                        </span>` 
+                      : `<span></span>`}
+                    <span style='width: ${maxValueWidth}; text-align: left;'>
                       ${config.tooltip.value.format(ttl.value)}  
-                    </div>
+                    </span>
                   </div>`;
-				textOutput += out;
-      });
-      textOutput += "</div></div>";
+        textOutput += out;
+
+        if ((i + 1) % ROW_COUNT === 0) {
+          textOutput += "</div>";
+        }
+      }
+      textOutput += "</div>";
+      textOutput += "</div>";
+      textOutput += "</div>";
       
       return textOutput;
 		} else {
@@ -219,14 +233,18 @@ class LineChart extends WChart{
   }
 
   getStartEndTime = (data) => {
-    let config = this.config;
-    let { timeDiff } = config.xAxis;
+    let config   = this.config;
+    let timeDiff = config.xAxis.timeDiff;
 
     let dataStartTime = data[0][0];
-    let dataEndTime = data[0][0];
+    let dataEndTime   = data[0][0];
 
-    let length = data.length;
+    let length   = data.length;
     let interval = timeDiff;
+
+    if (length > 1) {
+      interval = data[1][0] - data[0][0];
+    }
 
     for (let i = 1; i < length; i++) {
       if (dataStartTime > data[i][0]) {
@@ -237,9 +255,10 @@ class LineChart extends WChart{
       }
       let plotDiff = data[i][0] - data[i - 1][0];
       if (plotDiff < interval) {
-        interval = plotDiff
+        interval = plotDiff;
       }
     }
+
     return { start: dataStartTime, end: dataEndTime, plotDiff: interval }
   }
 
@@ -265,16 +284,17 @@ class LineChart extends WChart{
       }
     }
 
-    let current = new Date().getTime();
-    this.endTime = current - (current % interval);
+    // let current = new Date().getTime();
+    // this.endTime = current - (current % interval);
+    this.endTime = dataEnd;
     this.startTime = this.endTime - timeDiff;
 
     if (this.startTime < dataStart) {
       this.startTime = dataStart;
     }
-    if (this.endTime > dataEnd) {
-      this.endTime = dataEnd;
-    }
+    // if (this.endTime > dataEnd) {
+    //   this.endTime = dataEnd;
+    // }
     
   }
 
@@ -352,6 +372,7 @@ class LineChart extends WChart{
           
           if (!fixedMax && datum[1] > that.maxValue ) {
             that.maxValue = getMaxValue(datum[1], plots);
+            console.log(that.maxValue);
           } 
           if (!fixedMin && datum[1] < that.minValue) {
             that.minValue = datum[1];
@@ -361,7 +382,9 @@ class LineChart extends WChart{
         that.heapSort.sort(cData.data, false, 0);
       } else {
         let colorValue = that.palette.getColorFromId(ds.id);
-        that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data1, color: colorValue });
+        let strokeValue = CoreFunc.formatRgb(colorValue)
+        let fillValue = CoreFunc.formatRgb(colorValue, 0.2);
+        that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data1, color: strokeValue, fill: fillValue });
       }
     })
 
@@ -403,7 +426,7 @@ class LineChart extends WChart{
     let plotPoint    = this.plotPoint;
     let hoveredPlots = this.hoveredPlots;
     // const { timeDiff }            = config.xAxis;
-    const { disconnectThreshold } = config.common;
+    const { disconnectThreshold, area } = config.common;
     const { x, y, w, h }          = this.chartAttr;
 
     ctx.save();
@@ -414,6 +437,8 @@ class LineChart extends WChart{
       let key = en.nextElement();
       let value = this.data.get(key);
       let prevTimestamp = 0;
+      let prevXCoord = 0;
+      let prevYCoord = 0;
 
       let length = value.data.length;
       let lineInit = false;
@@ -453,6 +478,18 @@ class LineChart extends WChart{
           if (datum[0] - prevTimestamp < disconnectThreshold) {
             ctx.lineTo(xCoord, yCoord);
             ctx.stroke();
+
+            if (area === true) {
+              ctx.save();
+              ctx.beginPath();
+              ctx.moveTo(prevXCoord, prevYCoord);
+              ctx.lineTo(prevXCoord, y + h);
+              ctx.lineTo(xCoord, y + h);
+              ctx.lineTo(xCoord, yCoord);
+              ctx.fillStyle = value.fill;
+              ctx.fill();
+              ctx.restore();
+            }
           } else {
             ctx.closePath();
           }
@@ -465,7 +502,8 @@ class LineChart extends WChart{
           key: key,
 					id: value.id,
 					label: value.label,
-					color: value.color,
+          color: value.color,
+          fill: value.fill,
 				  x: xCoord,
           y: yCoord,
           xPos: xPos,
@@ -477,6 +515,8 @@ class LineChart extends WChart{
         })
 
         prevTimestamp = datum[0];
+        prevXCoord = xCoord;
+        prevYCoord = yCoord;
       }
       // value.data.map((datum, idx) => {
         

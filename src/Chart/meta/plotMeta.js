@@ -119,10 +119,10 @@ export function calculateFormat (diff) {
     return HOUR_MINUTE;
   }
   else if (diff >= FIVE_MIN_IN_MILLIS) {
-    return FULL_TIME;
+    return HOUR_MINUTE;
   }
   else if (diff >= TWO_MIN_IN_MILLIS) {
-    return MINUTE_SECOND;
+    return HOUR_MINUTE;
   }
   else if (diff >= MIN_IN_MILLIS) {
     return MINUTE_SECOND;

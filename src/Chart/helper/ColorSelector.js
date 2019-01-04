@@ -11,8 +11,9 @@ class ColorSelector {
     this.colorList = [];
     let that       = this;
     
-    defaultPalette.forEach((dp) => {
+    defaultPalette.forEach((dp, idx) => {
       that.colorList.push({
+        id: idx,
         color: dp.color,
         hex: dp.hex,
         rgb: dp.rgb,
@@ -22,8 +23,30 @@ class ColorSelector {
     })
   }
 
+  addCustomColor = (item) => {
+    let lastId = this.colorList[this.colorList.length - 1].id
+    this.colorList.push({
+      id: lastId + 1,
+      color: item.color,
+      hex: item.hex,
+      rgb: item.rgb,
+      rgbStr: CoreFunc.formatRgb(item.rgb),
+      list: [],
+    })
+  }
+
+  removeColor = (id) => {
+    this.colorList = this.colorList.filter((color) => {
+      return color.id !== id;
+    })
+  }
+
+  listAllColors = () => {
+    return this.colorList;
+  }
+
   getColorFromId = (key) => {
-    if (key === -1) return nonInstanceColor.hex;
+    if (key === -1) return nonInstanceColor.rgb;
 
     let current = Math.abs(key) % defaultPalette.length;
     let color   = this.colorList[current];
@@ -39,10 +62,10 @@ class ColorSelector {
           else return el;
         })
       }
-      return CoreFunc.formatRgb(newColor);
+      return newColor;
     } else {
       color.list.push(key);
-      return color.rgbStr;
+      return color.rgb;
     }
   }
 }

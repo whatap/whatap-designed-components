@@ -23,6 +23,8 @@ class ChartWrapper extends Component{
       this.canvasRef = element;
     }
 
+    console.log("Updated Chart");
+
   }
 
   componentDidMount() {
@@ -54,18 +56,31 @@ class ChartWrapper extends Component{
       that.resizeCanvas();
     }, 100);
 
+    // this.chartInitSizing = setInterval(() => {
+    //   try {
+    //     if (that.mainDiv.clientWidth !== that.canvasRef.clientWidth) {
+    //       that.resizeCanvas();
+    //     } else {
+    //       clearInterval(that.chartInitSizing);
+    //     }
+    //   } catch (e) {
+    //     console.log("Resizing error");
+    //     clearInterval(that.chartInitSizing);
+    //   } 
+    // }, 1);
+
+    this.mainDivWidth = this.mainDiv.clientWidth;
     this.chartInitSizing = setInterval(() => {
       try {
-        if (that.mainDiv.clientWidth !== that.canvasRef.clientWidth) {
+        if (that.mainDivWidth !== that.mainDiv.clientWidth) {
           that.resizeCanvas();
-        } else {
-          clearInterval(that.chartInitSizing);
+          that.mainDivWidth = that.mainDiv.clientWidth;
         }
       } catch (e) {
         console.log("Resizing error");
         clearInterval(that.chartInitSizing);
-      } 
-    }, 100);
+      }
+    }, 1000);
 
     this.chart.setTheme(theme);
     this.chart.drawChart();
@@ -102,6 +117,10 @@ class ChartWrapper extends Component{
 
     if (this.props.theme !== nextProps.theme) {
       this.chart.setTheme(nextProps.theme, true);
+    }
+
+    if (this.props.chartRef !== nextProps.chartRef) {
+      nextProps.chartRef(this.chart);
     }
 
     return false;

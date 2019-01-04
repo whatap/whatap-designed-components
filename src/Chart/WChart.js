@@ -137,9 +137,9 @@ class WChart {
     this.canvas.style.height = (height) + "px";
 
     this.ctx.scale(this.ratio, this.ratio);
-  }
 
-  
+    this.drawPreBackground();
+  }
 
   initListener = () => {
     this.tooltip = new Tooltip();
@@ -272,8 +272,8 @@ class WChart {
   drawChart = () => {
     let validated = this.dataValidation();
 
+    this.drawPreBackground();
     if (validated) {
-      this.drawPreBackground();
       this.drawData();
       this.drawPostBackground();
     }
@@ -356,7 +356,7 @@ class WChart {
     const { plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
 
     const xOptions = {
-      format: xAxisFormat || calculateFormat(timeDiff),
+      format: xAxisFormat || calculateFormat(diff),
       minOffset: 3,
       chartAttr, 
       startTime, 
@@ -398,7 +398,7 @@ class WChart {
     const { plotLine: yPlotLine, axisLine: yAxisLine } = config.yAxis;
 
     const xOptions = {
-      format: xAxisFormat || calculateFormat(timeDiff),
+      format: xAxisFormat || calculateFormat(diff),
       minOffset: 3,
       chartAttr, startTime, endTime, xPlotLine, xAxisLine, theme
     }
