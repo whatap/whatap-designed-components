@@ -30,7 +30,7 @@ class WChart {
     this.initListener();
     this.initUtils();
 
-    this.focused  = undefined;
+    this.focused  = [];
     this.mediator = undefined;
   }
 
@@ -243,6 +243,7 @@ class WChart {
 
 
     let selectedDot;
+    let dots = [];
 		for (let i = 0; i < max; i++) {
 			let dot = this.dots[i];
 			if (dot.time > timeValue - (clickRange / 2) && dot.time < timeValue + (clickRange / 2)
@@ -250,10 +251,21 @@ class WChart {
         selectedDot = dot;
 				break;
 			}
-		}
-    this.drawSelected(selectedDot);
+    }
+
+    if (selectedDot) {
+      for (let i = 0; i < max; i++) {
+        let dot = this.dots[i];
+        if (dot.time > timeValue - (clickRange / 2) && dot.time < timeValue + (clickRange / 2)
+          && selectedDot.id === dot.id) {
+          dots.push(dot);
+        }
+      }
+    }
+    
+    this.drawSelected(dots);
     if ( mediator ) {
-      this.notifyMediator("clicked", "drawSelected", selectedDot);
+      this.notifyMediator("clicked", "drawSelected", dots);
     }
   }
 
@@ -295,8 +307,8 @@ class WChart {
     throw new Error("WChart cannot be instantiated. Please extend this class to utilize it");
   }
 
-  drawSelected = (dot) => {
-    this.focused = dot;
+  drawSelected = (dots) => {
+    this.focused = dots;
     this.drawChart();
   }
 

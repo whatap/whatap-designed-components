@@ -17,7 +17,8 @@ class ColorSelector {
         color: dp.color,
         hex: dp.hex,
         rgb: dp.rgb,
-        rgbStr: CoreFunc.formatRgb(dp.rgb),
+        alpha: dp.alpha,
+        rgbStr: CoreFunc.formatRgb(dp.rgb, dp.alpha),
         list: [],
       })
     })
@@ -46,7 +47,7 @@ class ColorSelector {
   }
 
   getColorFromId = (key) => {
-    if (key === -1) return nonInstanceColor.rgb;
+    if (key === -1) return { rgb: nonInstanceColor.rgb, alpha: nonInstanceColor.alpha };
 
     let current = Math.abs(key) % defaultPalette.length;
     let color   = this.colorList[current];
@@ -62,10 +63,10 @@ class ColorSelector {
           else return el;
         })
       }
-      return newColor;
+      return { rgb: newColor, alpha: color.alpha };
     } else {
       color.list.push(key);
-      return color.rgb;
+      return { rgb: color.rgb, alpha: color.alpha };
     }
   }
 }

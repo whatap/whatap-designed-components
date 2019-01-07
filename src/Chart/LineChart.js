@@ -36,8 +36,8 @@ class LineChart extends WChart{
       this.data.clear();
       dataset.map((ds, idx) => {
         let colorValue = that.palette.getColorFromId(ds.id);
-        let strokeValue = CoreFunc.formatRgb(colorValue);
-        let fillValue = CoreFunc.formatRgb(colorValue, 0.2);
+        let strokeValue = CoreFunc.formatRgb(colorValue.rgb, colorValue.alpha);
+        let fillValue = CoreFunc.formatRgb(colorValue.rgb, 0.2);
   
         /**
          * Sorts the inner data in ascending order.
@@ -108,11 +108,12 @@ class LineChart extends WChart{
       }
     }
     
-    if (this.focused) {
-      let currentDot = tooltipList.find((el) => {
-        return that.focused.id === el.id
+    if (this.focused && this.focused.length > 0) {
+      let currentDot = tooltipList.filter((el) => {
+        let dot = that.focused.find((fc) => fc.id === el.id)
+        if (dot) return dot;
       })
-      tooltipList = [currentDot];
+      tooltipList = currentDot;
     }
 
 		if (tooltipList.length !== 0) {
@@ -154,7 +155,8 @@ class LineChart extends WChart{
       const ROW_COUNT = 15;
       let columns = Math.ceil(length / ROW_COUNT);
       let widthRatio = 100 / columns;
-      textOutput += `<div style='display: flex; width: ${(maxTooltipWidth + 20) * columns}px;'>`;
+      // textOutput += `<div style='display: flex; width: ${(maxTooltipWidth + 20) * columns}px;'>`;
+      textOutput += `<div style='display: flex;'>`;
 
       for (let i = 0; i < length; i++) {
         let ttl = list[i];
@@ -163,16 +165,16 @@ class LineChart extends WChart{
           textOutput += `<div style='display: inline-block; width: ${widthRatio}%;'>`;
         }
 
-        let out = `<div style='text-align: center; padding-left: 1px; padding-right: 1px;'>
-                    ${ttl.colorLabel} 
+        let out = `<div style='text-align: center; padding-left: 5px; padding-right: 5px; '>
+                    ${ttl.colorLabel}
                     ${ttl.label 
-                      ? `<span style='width: ${maxLabelWidth}; text-align: left;'>
-                          ${ttl.label}: 
-                        </span>` 
-                      : `<span></span>`}
-                    <span style='width: ${maxValueWidth}; text-align: left;'>
+                      ? `<div style='display: inline-block; width: ${maxLabelWidth}px; text-align: left;'>
+                          ${ttl.label}
+                        </div><div style='display: inline-block;'>:</div>` 
+                      : `<div style='display: inline-block;'></div>`}
+                    <div style='display: inline-block; width: ${maxValueWidth}px; text-align: right;'>
                       ${config.tooltip.value.format(ttl.value)}  
-                    </span>
+                    </div>
                   </div>`;
         textOutput += out;
 
@@ -216,11 +218,12 @@ class LineChart extends WChart{
       }
     }
     
-    if (this.focused) {
-      let currentDot = tooltipList.find((el) => {
-        return that.focused.id === el.id
+    if (this.focused && this.focused.length > 0) {
+      let currentDot = tooltipList.filter((el) => {
+        let dot = that.focused.find((fc) => fc.id === el.id)
+        if (dot) return dot;
       })
-      tooltipList = [currentDot];
+      tooltipList = currentDot;
     }
 
     if (tooltipList.length !== 0) {
@@ -382,7 +385,7 @@ class LineChart extends WChart{
         that.heapSort.sort(cData.data, false, 0);
       } else {
         let colorValue = that.palette.getColorFromId(ds.id);
-        let strokeValue = CoreFunc.formatRgb(colorValue)
+        let strokeValue = CoreFunc.formatRgb(colorValue.rgb, colorValue.alpha);
         let fillValue = CoreFunc.formatRgb(colorValue, 0.2);
         that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data1, color: strokeValue, fill: fillValue });
       }
@@ -469,7 +472,8 @@ class LineChart extends WChart{
           ctx.beginPath();
           
           ctx.strokeStyle = value.color;
-					if (this.focused && this.focused.id !== value.id) {
+          if (this.focused && this.focused.length > 0
+            && this.focused.find((fc) => fc.id !== value.id)) {
 						ctx.strokeStyle = theme.unselected;
 					}
           ctx.moveTo(xCoord, yCoord);
