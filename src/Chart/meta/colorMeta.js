@@ -54,5 +54,6 @@ export const defaultPalette = [
 ]
 
 export const nonInstanceColor = {
-  color: 'blue', hex: '#5FB3F4', rgb: [95, 179, 244], alpha: 100
+  // color: 'blue', hex: '#5FB3F4', rgb: [95, 179, 244], alpha: 100
+  color: 'blue_a400', hex: '#2979ff', rgb: [41, 121, 255], alpha: 100
 }

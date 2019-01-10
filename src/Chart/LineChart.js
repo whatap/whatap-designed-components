@@ -43,6 +43,20 @@ class LineChart extends WChart{
          * Sorts the inner data in ascending order.
          */
         that.heapSort.sort(ds.data, false, 0);
+
+        /**
+         * Cropping method for when data received is 0.
+         */
+        if (ds.data.length > 5) {
+          let dsLength = ds.data.length;
+          for (let i = dsLength - 1; i > dsLength - 5; i--) {
+            if (ds.data[i]) {
+              if (ds.data[i][1] === 0) {
+                ds.data.splice(i, 1);
+              }
+            }
+          }
+        }
   
         /**
          * If not fixed Minimum / Maximum value, evaluate the data within and decide the max/min value
@@ -364,6 +378,7 @@ class LineChart extends WChart{
                 break;
               case "replace":
                 hasData[1] = datum[1];
+                break;
               case "none":
               default:
                 cData.data.push(datum);

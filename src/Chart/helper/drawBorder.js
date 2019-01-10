@@ -53,14 +53,13 @@ export function drawYplot (ctx, args) {
 
 export function drawXaxis (ctx, args) {
   let options = args;
-  let { xAxisLine, chartAttr, theme } = options;
+  let { chartAttr, theme } = options;
   let { x, y, w, h } = chartAttr;
   
   ctx.save();
 
   ctx.beginPath();
-  // ctx.strokeStyle = xAxisLine.color;
-  ctx.strokeStyle = theme.axisLine;
+  ctx.strokeStyle = theme.xAxisLine;
   ctx.moveTo(x, y + h);
   ctx.lineTo(x + w, y + h);
   ctx.stroke();
@@ -70,14 +69,13 @@ export function drawXaxis (ctx, args) {
 
 export function drawYaxis (ctx, args) {
   let options = args;
-  let { yAxisLine, chartAttr, theme } = options;
+  let { chartAttr, theme } = options;
   let { x, y, w, h } = chartAttr;
   
   ctx.save();
 
   ctx.beginPath();
-  // ctx.strokeStyle = yAxisLine.color;
-  ctx.strokeStyle = theme.axisLine;
+  ctx.strokeStyle = theme.yAxisLine;
   ctx.moveTo(x, y);
   ctx.lineTo(x, y + h);
   ctx.stroke();
