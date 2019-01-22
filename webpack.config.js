@@ -5,17 +5,20 @@ const config = {
   mode: 'production',
   context: path.resolve(__dirname, 'src'), 
   entry: {
-    main: './index.js'
+    main: './index_umd.js'
   },
   output: {
     path: path.resolve(__dirname, 'umd'),
+    libraryTarget: 'umd',
+    library: 'wdc',
     filename: 'wdc.min.js'
   },
   module: {
     rules: [
       {
         test: /\.js$/,
-        exclude: [/(node_modules)/],
+        include: [path.resolve(__dirname, 'src'), /node_modules\/lodash.merge/ ],
+        exclude: [/(node_modules)/, path.resolve(__dirname, 'src/ReactWrapper'), path.resolve(__dirname, 'src/index.js')],
         loader: "babel-loader"
       }
     ]

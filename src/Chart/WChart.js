@@ -1,34 +1,26 @@
-import { mergeDeep } from './util/mergeDeep';
-import defaultOptions from './option/lineChartDefault';
-import { Palette } from '../Palette';
-import { LinkedMap, HeapSort } from '../core';
+import AbstractChart from './AbstractChart'
 import { drawXplot, drawYplot, drawXaxis, drawYaxis } from './helper/drawBorder';
 import { drawXtick, drawYtick } from './helper/drawTick';
-import Tooltip, { drawTooltipCircle } from './helper/drawTooltip';
-import moment from 'moment';
+import Tooltip from './helper/drawTooltip';
 import { getMousePos } from './helper/mouseEvt'
-import ChartMediator from './mediator/ChartMediator';
 import { tooltipCalcX, tooltipRange, calculatePlots } from './util/positionCalc';
 import { calculateFormat } from './meta/plotMeta';
 import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X, CHART_TICK_SPACE } from './meta/globalMeta';
-import { merge } from 'lodash/object';
+import merge from 'lodash.merge';
 import { drawHelper } from './helper/drawHelper';
-import { colorTheme } from './meta/themeMeta';
-import ColorSelector from './helper/ColorSelector';
+import { getScreenRatio } from './util/displayModulator';
 
 /**
  * TODO: 색상 관련 문제 해결 및 Dark Theme 대응 처리
  * TODO: Palette 관련 문제 해결 -> Singleton으로 변경할 필요 있음
  */
-class WChart {
+class WChart extends AbstractChart {
   constructor(bindId, colorId, options) {
-    this.init(bindId, colorId);
-    this.initOptions(options);
+    super(bindId, colorId, options);
     this.setTheme();
     this.initCanvas();
 
     this.initListener();
-    this.initUtils();
 
     this.focused  = [];
     this.mediator = undefined;
@@ -43,57 +35,6 @@ class WChart {
         console.log("mediator not defined");
       }
     }
-  }
-
-  wGetBoundingClientRect = (element) => {
-    if ( this.bcRect === null || typeof this.bcRect === 'undefined' ) {
-      this.bcRect = element.getBoundingClientRect();
-    }
-		return this.bcRect;
-  }
-
-  overrideClientRect = () => {
-    this.bcRect = this.canvas.getBoundingClientRect();
-    return this.bcRect;
-  }
-
-  wGetScreenRatio = () => {
-    if ( this.ratio === null || typeof this.ratio === 'undefined' ) {
-      this.ratio = window.devicePixelRatio;
-    }
-    if (this.ratio < 2) {
-      this.ratio = 2;
-    }
-  }
-
-  clearClientRect = () => {
-    this.bcRect = null;
-  }
-
-  clearScreenRatio = () => {
-    this.ratio = null;
-  }
-
-  init = (bindId, colorId) => {
-    this.chartId      = bindId;
-    this.canvas       = document.getElementById(bindId);
-    this.ctx          = this.canvas.getContext("2d");
-    this.data         = new LinkedMap();
-    this.palette      = ColorSelector;
-    this.plotPoint    = true;
-    this.hoveredPlots = [];
-
-    let that = this;
-
-    this.themePalette = merge({}, colorTheme);
-
-    this.chartAttr = {
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0,
-    }
-		this.dots = [];
   }
 
   addTheme = (theme) => {
@@ -111,22 +52,10 @@ class WChart {
     }
   }
 
-  initOptions = (options) => {
-    this.config    = merge({}, defaultOptions, options);
-    this.startTime = this.config.xAxis.startTime;
-    this.endTime   = this.config.xAxis.endTime;
-    this.minValue  = this.config.yAxis.minValue;
-    this.maxValue  = this.config.yAxis.maxValue;
-  }
-
-  updateOptions = (newOptions) => {
-    this.config    = merge({}, this.config, newOptions);
-    this.drawChart();
-  }
 
   initCanvas = () => {
     this.wGetBoundingClientRect(this.canvas);
-    this.wGetScreenRatio();
+    this.ratio = getScreenRatio(this.ratio);
 
     let width  = this.bcRect.width;
     let height = this.bcRect.height;
@@ -277,10 +206,6 @@ class WChart {
     throw new Error("WChart cannot be instantiated. Please extend this class to utilize it");
   }
 
-  initUtils = () => {
-    this.heapSort = new HeapSort();
-  }
-
   drawChart = () => {
     let validated = this.dataValidation();
 
@@ -289,18 +214,6 @@ class WChart {
       this.drawData();
       this.drawPostBackground();
     }
-  }
-
-  dataValidation = () => {
-    let startTime = this.startTime;
-    let endTime   = this.endTime;
-
-    if (startTime > endTime) {
-      console.log("timestamp incorrect: " + startTime + " / " + endTime);
-      return false;
-    }
-
-    return true;
   }
 
   drawData = () => {
@@ -437,50 +350,6 @@ class WChart {
      */
     if (config.xAxis.axisLine.display) drawXaxis(ctx, xOptions);
     if (config.yAxis.axisLine.display) drawYaxis(ctx, yOptions);
-  }
-
-  resizeCanvas = (element, fixedHeight) => {
-    if (!element) {
-      element = this.overrideClientRect();
-    }
-
-    if (!fixedHeight) {
-      this.bcRect = {
-        ...this.bcRect,
-        width: element.clientWidth,
-        height: element.clientHeight,
-      }
-    } else {
-      this.bcRect = {
-        ...this.bcRect,
-        width: element.clientWidth,
-        height: Number(fixedHeight),
-      }
-    }
-
-    this.setDpiSupport();
-  }
-
-  resizeCanvasWithSize = (width, height) => {
-    this.bcRect = {
-      width: width,
-      height: height
-    }
-
-    this.setDpiSupport();
-  }
-
-  setDpiSupport = () => {
-    const canvas = this.canvas;
-    const ratio  = this.ratio;
-    const ctx    = this.ctx;
-    const { width, height } = this.bcRect;
-
-    canvas.width = width * ratio;
-    canvas.height = height * ratio;
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
 }

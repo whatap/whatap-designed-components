@@ -4,10 +4,8 @@
  * All rights reserved to WhaTap Labs 2018
  */
 import WChart from './WChart';
-import moment from 'moment';
 import { tooltipCalcX, tooltipRange } from './util/positionCalc'
 import { drawTooltipCircle } from './helper/drawTooltip';
-import { TEN_MIN_IN_MILLIS, SEC_IN_MILLIS } from './meta/plotMeta';
 import { getMaxValue } from './util/positionCalc';
 import { CoreFunc } from '../core';
 
@@ -162,7 +160,8 @@ class LineChart extends WChart{
     
       let timeEl = `<div style='display: block; text-align: center; padding-left: 1px; padding-right: 1px;'>${timestamp}</div>`;
       
-      let textOutput = "<div>";
+      let fontType = '"Helvetica Neue", "Helvetica", "Arial", sans-serif';
+      let textOutput = `<div style='font-family: ${fontType}'>`;
       textOutput += timeEl;
 
       let length = list.length;

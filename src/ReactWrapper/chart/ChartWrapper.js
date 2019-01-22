@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ChartCollection, LineChart } from '../Chart'
+import { ChartCollection, LineChart } from '../../Chart'
 
 function objectCompare (object1, object2) {
   // Return if value is not an object
