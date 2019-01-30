@@ -8,7 +8,6 @@ import defaultOptions from './option/lineChartDefault'
 
 class AbstractChart {
   constructor(bindId, colorId, options) {
-    console.log("hello, world!");
     this.init(bindId, colorId);
     this.initOptions(options);
 
@@ -40,8 +39,6 @@ class AbstractChart {
 
   initOptions = (options) => {
     this.config    = merge({}, defaultOptions, options);
-    console.log(defaultOptions);
-    console.log(this.config);
     this.startTime = this.config.xAxis.startTime;
     this.endTime   = this.config.xAxis.endTime;
     this.minValue  = this.config.yAxis.minValue;

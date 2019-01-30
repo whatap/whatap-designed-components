@@ -8,49 +8,68 @@ class ColorSelector {
     }
     this.hash      = Math.random() * 1000;
     this.instance  = this;
-    this.colorList = [];
+    this.colorList = {};
     let that       = this;
     
-    defaultPalette.forEach((dp, idx) => {
-      that.colorList.push({
-        id: idx,
-        color: dp.color,
-        hex: dp.hex,
-        rgb: dp.rgb,
-        alpha: dp.alpha,
-        rgbStr: CoreFunc.formatRgb(dp.rgb, dp.alpha),
-        list: [],
-      })
-    })
+    for (let theme in defaultPalette) {
+      if (defaultPalette.hasOwnProperty(theme)) {
+        let pTheme = defaultPalette[theme];
+        this.colorList[theme] = [];
+        
+        pTheme.forEach((dp, idx) => {
+          that.colorList[theme].push({
+            id: idx,
+            color: dp.color,
+            hex: dp.hex,
+            rgb: dp.rgb,
+            alpha: dp.alpha,
+            rgbStr: CoreFunc.formatRgb(dp.rgb, dp.alpha),
+            list: [],
+          })
+        })
+      }
+    }
+    
+    // defaultPalette.forEach((dp, idx) => {
+    //   that.colorList.push({
+    //     id: idx,
+    //     color: dp.color,
+    //     hex: dp.hex,
+    //     rgb: dp.rgb,
+    //     alpha: dp.alpha,
+    //     rgbStr: CoreFunc.formatRgb(dp.rgb, dp.alpha),
+    //     list: [],
+    //   })
+    // })
   }
 
-  addCustomColor = (item) => {
-    let lastId = this.colorList[this.colorList.length - 1].id
-    this.colorList.push({
-      id: lastId + 1,
-      color: item.color,
-      hex: item.hex,
-      rgb: item.rgb,
-      rgbStr: CoreFunc.formatRgb(item.rgb),
-      list: [],
-    })
-  }
+  // addCustomColor = (item) => {
+  //   let lastId = this.colorList[this.colorList.length - 1].id
+  //   this.colorList.push({
+  //     id: lastId + 1,
+  //     color: item.color,
+  //     hex: item.hex,
+  //     rgb: item.rgb,
+  //     rgbStr: CoreFunc.formatRgb(item.rgb),
+  //     list: [],
+  //   })
+  // }
 
-  removeColor = (id) => {
-    this.colorList = this.colorList.filter((color) => {
-      return color.id !== id;
-    })
-  }
+  // removeColor = (id) => {
+  //   this.colorList = this.colorList.filter((color) => {
+  //     return color.id !== id;
+  //   })
+  // }
 
   listAllColors = () => {
     return this.colorList;
   }
 
-  getColorFromId = (key) => {
+  getColorFromId = (key, themeId) => {
     if (key === -1) return { rgb: nonInstanceColor.rgb, alpha: nonInstanceColor.alpha };
 
-    let current = Math.abs(key) % defaultPalette.length;
-    let color   = this.colorList[current];
+    let current = Math.abs(key) % this.colorList[themeId].length;
+    let color   = this.colorList[themeId][current];
 
     if (color && color.list.includes(key)) {
       let currentPos = color.list.indexOf(key);
@@ -59,7 +78,7 @@ class ColorSelector {
       for (let i = 0; i < currentPos; i++) {
         let minIndex = CoreFunc.getMinValueIndexFromArray(newColor).index;
         newColor = newColor.map((el, idx) => {
-          if (idx === minIndex) return (el + 10) % 256;
+          if (idx === minIndex) return (el + 30) % 256;
           else return el;
         })
       }

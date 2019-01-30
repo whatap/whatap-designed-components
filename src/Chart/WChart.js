@@ -46,6 +46,7 @@ class WChart extends AbstractChart {
       theme = 'wh';
     }
     this.theme = this.themePalette[theme];
+    this.themeId = theme;
 
     if (override) {
       this.drawChart();

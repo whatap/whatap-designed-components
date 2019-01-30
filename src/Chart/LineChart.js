@@ -20,6 +20,7 @@ class LineChart extends WChart{
     let that      = this;
     let config    = this.config;
     let plots     = this.plots;
+    let themeId   = this.themeId;
     this.maxPlot  = config.xAxis.maxPlot;
     const { minValue, maxValue, fixedMin, fixedMax }  = config.yAxis;
     
@@ -33,7 +34,7 @@ class LineChart extends WChart{
 
       this.data.clear();
       dataset.map((ds, idx) => {
-        let colorValue = that.palette.getColorFromId(ds.id);
+        let colorValue = that.palette.getColorFromId(ds.id, themeId);
         let strokeValue = CoreFunc.formatRgb(colorValue.rgb, colorValue.alpha);
         let fillValue = CoreFunc.formatRgb(colorValue.rgb, 0.2);
   
@@ -348,9 +349,10 @@ class LineChart extends WChart{
 
   updateData = (dataset) => {
     if (!dataset) return;
-    let that   = this;
-    let config = this.config;
-    let plots  = this.plots;
+    let that    = this;
+    let config  = this.config;
+    let plots   = this.plots;
+    let themeId = this.themeId;
     const { fixedMin, fixedMax }  = config.yAxis;
 
     dataset.map((ds, idx) => {
@@ -389,7 +391,6 @@ class LineChart extends WChart{
           
           if (!fixedMax && datum[1] > that.maxValue ) {
             that.maxValue = getMaxValue(datum[1], plots);
-            console.log(that.maxValue);
           } 
           if (!fixedMin && datum[1] < that.minValue) {
             that.minValue = datum[1];
@@ -398,7 +399,7 @@ class LineChart extends WChart{
 
         that.heapSort.sort(cData.data, false, 0);
       } else {
-        let colorValue = that.palette.getColorFromId(ds.id);
+        let colorValue = that.palette.getColorFromId(ds.id, themeId);
         let strokeValue = CoreFunc.formatRgb(colorValue.rgb, colorValue.alpha);
         let fillValue = CoreFunc.formatRgb(colorValue, 0.2);
         that.data.put(ds.key, { id: ds.id, label: ds.label, data: ds.data1, color: strokeValue, fill: fillValue });

@@ -22,7 +22,7 @@ class PublicLegend {
       if (typeof exists === 'undefined') {
         this.dataset.push({ 
           id: data.id, 
-          label: data.label, 
+          label: data.label,
           focus: true
         });
       }

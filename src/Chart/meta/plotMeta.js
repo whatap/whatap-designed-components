@@ -36,6 +36,13 @@ export const DATE_HOUR_MINUTE = "DD일 HH:mm";
 export const HOUR_MINUTE = "HH:mm";
 export const MINUTE_SECOND = "mm:ss";
 
+export const MILLION = 1000000
+export const HUNDRED_THOUSAND = 100000
+export const TEN_THOUSAND = 10000
+export const THOUSAND = 1000
+export const HUNDRED = 100
+export const TEN = 10
+
 export default function calculateDiff (diff) {
   if      (diff > MONTH_IN_MILLIS) {
     return SEVEN_DAY_IN_MILLIS;
@@ -135,5 +142,25 @@ export function calculateFormat (diff) {
   }
   else {
     return FULL_TIME;
+  }
+}
+// 90, 5 -> 18
+export function calculateMinimum (value, plots) {
+  let current = Math.ceil(value / plots);
+
+  let digits = current.toString().length > 0 ? current.toString().length : 0;
+  let maxMinimumVal = Math.pow(10, digits);
+  
+  // 10,000
+  let compMinimumVal = Math.ceil(maxMinimumVal / 10);
+
+  if (current > compMinimumVal * 5) {
+    return maxMinimumVal;
+  } else if (current > compMinimumVal * 2) {
+    return compMinimumVal * 5;
+  } else if (current > compMinimumVal * 1) {
+    return compMinimumVal * 2;
+  } else {
+    return compMinimumVal;
   }
 }

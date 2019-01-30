@@ -1,4 +1,5 @@
 import { PLOT_STANDARD } from '../meta/globalMeta';
+import { calculateMinimum } from '../meta/plotMeta';
 
 const tooltipCalcX = (startTime, endTime, startPos, endPos, mousePosX) => {
   let timeDiff  = endTime - startTime;
@@ -44,26 +45,31 @@ const calculatePlots = (height) => {
   return parseInt(height / PLOT_STANDARD);
 }
 
+// const getMaxValue = (data, plots) => {
+//   let current       = plots;
+//   let expectedMax   = parseInt(data * 1.1);
+//   let maxDigits  = expectedMax.toString().length - 1;
+
+//   /**
+//    * 네 자리 이상의 경우, 처리 단위를 올린다.
+//    */
+//   let roundDigits = maxDigits > 4 ? maxDigits : maxDigits - 1;
+//   let expectedRound = Math.pow(10, roundDigits);
+//   let threshold     = parseInt(data * 2 / plots);
+
+//   for (let i = 0; i < threshold; i++) {
+//     current += plots;
+//     if (current > expectedMax && current % expectedRound === 0) {
+//       break;
+//     }
+//   }
+
+//   return current;
+// }
+
+
 const getMaxValue = (data, plots) => {
-  let current       = plots;
-  let expectedMax   = parseInt(data * 1.1);
-  let maxDigits  = expectedMax.toString().length - 1;
-
-  /**
-   * 네 자리 이상의 경우, 처리 단위를 올린다.
-   */
-  let roundDigits = maxDigits > 4 ? maxDigits : maxDigits - 1;
-  let expectedRound = Math.pow(10, roundDigits);
-  let threshold     = parseInt(data * 2 / plots);
-
-  for (let i = 0; i < threshold; i++) {
-    current += plots;
-    if (current > expectedMax && current % expectedRound === 0) {
-      break;
-    }
-  }
-
-  return current;
+  return calculateMinimum(data, plots) * plots;
 }
 
 
