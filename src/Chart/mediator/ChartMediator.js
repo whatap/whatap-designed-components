@@ -1,4 +1,5 @@
 import WChart from '../WChart';
+
 class ChartMediator {
   constructor() {
     if (this.instance) {

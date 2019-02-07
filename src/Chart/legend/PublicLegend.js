@@ -1,15 +1,24 @@
-import ChartMediator from '../mediator/ChartMediator';
+import ChartObserver from '../observer/ChartObserver';
 
 class PublicLegend {
   constructor() {
-    this.mediator = ChartMediator;
+    this.chartObserver = ChartObserver.instance;
+    this.subscribeObserver();
 
     this.dataset = [];
   }
-  notifyMediator = (action, arg) => {
-    if (typeof this.mediator[action] !== 'undefined') {
-      this.mediator[action](arg);
-    }
+
+  subscribeObserver = () => {
+    this.chartObserver.subscribe("clicked", this.drawSelectedGlobal, this);
+  }
+
+  drawSelectedGlobal = (dots) => {
+    this.focused = dots;
+    this.setData();
+  } 
+
+  notifyObserver = (eventName, data) => {
+    this.chartObserver.notify(eventName, data);
   }
 
   loadData = (dataset) => {
@@ -23,35 +32,29 @@ class PublicLegend {
         this.dataset.push({ 
           id: data.id, 
           label: data.label,
-          focus: true
+          focused: true
         });
       }
     }
   }
 
-  updateData = (dataset) => {
-    let length = dataset.length;
-    for (let i = 0; i < length; i++) {
-      let data = dataset[i];
-      let exists = this.dataset.find((ds) => {
-        return ds.id === data.id;
-      });
-      if (typeof exists === 'undefined') {
-        this.dataset.push({ 
-          id: data.id, 
-          label: data.label, 
-          focus: true
-        });
+  setData = () => {
+    let that = this;
+    this.dataset = this.dataset.map((ds) => {
+      if (that.focused.find(f => f.id === ds.id)) {
+        return { ...ds, focused: true }
+      } else {
+        return { ...ds, focused: false}
       }
-    }
+    })
   }
 
   handleClick = (id) => {
-    let data = this.dataset.find((ds) => {
+    let data = this.dataset.filter((ds) => {
       return ds.id === id;
     })
 
-    this.notifyMediator('clicked', data);
+    this.chartObserver.notify("clicked", data);
   }
 
 }

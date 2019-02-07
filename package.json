@@ -1,6 +1,6 @@
 {
   "name": "whatap-designed-components",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "Designed components used at WhaTap",
   "main": "src/index.js",
   "module": "es/index.js",
@@ -18,8 +18,9 @@
     "build:demo": "babel src --out-dir ../wdc-demo/src/wdc",
     "build:whatap": "babel src --out-dir ../apm/io.whatap/whatap.server.front.apm/src/main/resources/front/node_modules/whatap-designed-components/es",
     "build:all": "npm run test:assert && npm run build:umd_only && npm run build:es5_only",
+    "babel:test": "babel src/Chart/observer/ChartObserver.js --out-dir ./",
     "publish:latest": "npm publish",
-  "publish:alpha": "npm publish --tag alpha"
+    "publish:alpha": "npm publish --tag alpha"
   },
   "author": "Anthony Lee",
   "license": "ISC",

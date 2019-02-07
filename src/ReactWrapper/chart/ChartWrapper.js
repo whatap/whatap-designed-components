@@ -22,19 +22,21 @@ class ChartWrapper extends Component{
     this.setCanvas = element => {
       this.canvasRef = element;
     }
-
-    console.log("Updated Chart");
-
   }
 
   componentDidMount() {
     let that = this;
-    const { type, id, colorId, mediator, options, manipulator, data, chartRef, theme, customTheme } = this.props;
+    const { type, id, options, manipulator, data, chartRef, theme, customTheme, chartMouseClick} = this.props;
 
-    this.chart = new ChartCollection[type](id, colorId, options);
+    this.chart = new ChartCollection[type](id, options);
 
     if ( chartRef ) {
+      console.log(chartRef);
       chartRef(this.chart);
+    }
+
+    if ( chartMouseClick ) {
+      this.chart.chartMouseClick = chartMouseClick;
     }
     
     if ( data ) {
@@ -141,11 +143,6 @@ class ChartWrapper extends Component{
     return (
       <div ref={that.setDiv} style={{ width: "100%", height: "100%"}} >
         <canvas ref={that.setCanvas} id={id} style={{ width: cvWidth || "100%", height: cvHeight || "100%" }}/>
-          {/* { showLegend 
-          ? <div>
-              Hello, World!
-            </div>
-          : undefined} */}
       </div>
     )
   }

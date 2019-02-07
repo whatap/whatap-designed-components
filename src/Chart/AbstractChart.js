@@ -7,8 +7,8 @@ import { colorTheme } from './meta/themeMeta'
 import defaultOptions from './option/lineChartDefault'
 
 class AbstractChart {
-  constructor(bindId, colorId, options) {
-    this.init(bindId, colorId);
+  constructor(bindId, options) {
+    this.init(bindId);
     this.initOptions(options);
 
     this.initUtils();
@@ -22,7 +22,7 @@ class AbstractChart {
     this.canvas       = document.getElementById(bindId);
     this.ctx          = this.canvas.getContext("2d");
     this.data         = new LinkedMap();
-    this.palette      = ColorSelector;
+    this.palette      = ColorSelector.instance;
     this.plotPoint    = true;
     this.hoveredPlots = [];
 

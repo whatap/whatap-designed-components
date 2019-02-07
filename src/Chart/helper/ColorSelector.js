@@ -1,15 +1,13 @@
 import { defaultPalette, nonInstanceColor } from '../meta/colorMeta';
 import { CoreFunc } from '../../core';
+import { Singleton } from '../../core'
 
-class ColorSelector {
+class ColorSelector extends Singleton{
   constructor() {
-    if (this.instance) {
-      return this.instance;
-    }
-    this.hash      = Math.random() * 1000;
-    this.instance  = this;
-    this.colorList = {};
+    super();
     let that       = this;
+    this.hash      = Math.random() * 1000;
+    this.colorList = {};
     
     for (let theme in defaultPalette) {
       if (defaultPalette.hasOwnProperty(theme)) {
@@ -30,17 +28,6 @@ class ColorSelector {
       }
     }
     
-    // defaultPalette.forEach((dp, idx) => {
-    //   that.colorList.push({
-    //     id: idx,
-    //     color: dp.color,
-    //     hex: dp.hex,
-    //     rgb: dp.rgb,
-    //     alpha: dp.alpha,
-    //     rgbStr: CoreFunc.formatRgb(dp.rgb, dp.alpha),
-    //     list: [],
-    //   })
-    // })
   }
 
   // addCustomColor = (item) => {
@@ -90,6 +77,4 @@ class ColorSelector {
   }
 }
 
-const instance = new ColorSelector();
-Object.freeze(instance);
-export default instance;
+export default ColorSelector;

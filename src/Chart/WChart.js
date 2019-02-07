@@ -9,32 +9,42 @@ import { FONT_SIZE, FONT_TYPE, CHART_TICK_OFFSET_X, CHART_NON_TICK_OFFSET_X, CHA
 import merge from 'lodash.merge';
 import { drawHelper } from './helper/drawHelper';
 import { getScreenRatio } from './util/displayModulator';
+import ChartObserver from './observer/ChartObserver';
 
 /**
  * TODO: 색상 관련 문제 해결 및 Dark Theme 대응 처리
  * TODO: Palette 관련 문제 해결 -> Singleton으로 변경할 필요 있음
  */
 class WChart extends AbstractChart {
-  constructor(bindId, colorId, options) {
-    super(bindId, colorId, options);
+  constructor(bindId, options) {
+    super(bindId, options);
     this.setTheme();
     this.initCanvas();
 
     this.initListener();
 
     this.focused  = [];
-    this.mediator = undefined;
+    // this.mediator = undefined;
+    this.isSubscribed = true;
+    this.chartMouseClick = undefined;
+    this.chartObserver = ChartObserver.instance;
+
+    this.subscribeObserver();
   }
 
-  notifyMediator = (action, func, arg) => {
-    if (typeof this.mediator !== 'undefined' 
-    && typeof this.mediator[action] !== 'undefined') {
-      try {
-        this.mediator[action](func, arg);
-      } catch (e) {
-        console.log("mediator not defined");
-      }
-    }
+  // notifyMediator = (action, func, arg) => {
+  //   if (typeof this.mediator !== 'undefined' 
+  //   && typeof this.mediator[action] !== 'undefined') {
+  //     try {
+  //       this.mediator[action](func, arg);
+  //     } catch (e) {
+  //       console.log("mediator not defined");
+  //     }
+  //   }
+  // }
+
+  notifyObserver = (eventName, data) => {
+    this.chartObserver.notify(eventName, data);
   }
 
   addTheme = (theme) => {
@@ -73,10 +83,14 @@ class WChart extends AbstractChart {
 
   initListener = () => {
     this.tooltip = new Tooltip();
-    this.canvas.addEventListener("mouseover", this.handleMouseOver);
+    this.canvas.addEventListener("mouseover", (evt) => this.handleMouseOver(evt, ));
     this.canvas.addEventListener("mousemove", this.handleMouseMove);
     this.canvas.addEventListener("mouseout", this.handleMouseOut);
     this.canvas.addEventListener("click", this.handleMouseClick);
+  }
+
+  subscribeObserver = () => {
+    this.chartObserver.subscribe("clicked", this.drawSelectedGlobal, this);
   }
 
   handleMouseOver = (evt) => {
@@ -194,8 +208,13 @@ class WChart extends AbstractChart {
     }
     
     this.drawSelected(dots);
-    if ( mediator ) {
-      this.notifyMediator("clicked", "drawSelected", dots);
+    
+    if (this.isSubscribed) {
+      this.notifyObserver("clicked", dots);
+    }
+
+    if (this.chartMouseClick) {
+      this.chartMouseClick(dots);
     }
   }
 
@@ -224,6 +243,13 @@ class WChart extends AbstractChart {
   drawSelected = (dots) => {
     this.focused = dots;
     this.drawChart();
+  }
+
+  drawSelectedGlobal = (dots) => {
+    if (this.isSubscribed) {
+      this.focused = dots;
+      this.drawChart();
+    }
   }
 
   drawPreBackground = () => {

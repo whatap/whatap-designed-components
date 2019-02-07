@@ -10,8 +10,8 @@ import { getMaxValue } from './util/positionCalc';
 import { CoreFunc } from '../core';
 
 class LineChart extends WChart{
-  constructor(bindId, colorId, options) {
-    super(bindId, colorId, options);
+  constructor(bindId, options) {
+    super(bindId, options);
   }
 
   loadData = (dataset) => {
