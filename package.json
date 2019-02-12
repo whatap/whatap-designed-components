@@ -1,6 +1,6 @@
 {
   "name": "whatap-designed-components",
-  "version": "0.7.6",
+  "version": "0.8.0",
   "description": "Designed components used at WhaTap",
   "main": "src/index.js",
   "module": "es/index.js",
@@ -47,10 +47,12 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "babel-plugin-css-modules-transform": "^1.6.2",
     "classnames": "^2.2.6",
-    "lodash.merge": "^4.6.1",
     "clean-webpack-plugin": "^0.1.19",
+    "es6-symbol": "^3.1.1",
+    "lodash.merge": "^4.6.1",
     "moment": "^2.22.2"
   },
   "peerDependencies": {

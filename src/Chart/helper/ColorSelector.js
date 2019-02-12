@@ -26,27 +26,8 @@ class ColorSelector extends Singleton{
           })
         })
       }
-    }
-    
+    }    
   }
-
-  // addCustomColor = (item) => {
-  //   let lastId = this.colorList[this.colorList.length - 1].id
-  //   this.colorList.push({
-  //     id: lastId + 1,
-  //     color: item.color,
-  //     hex: item.hex,
-  //     rgb: item.rgb,
-  //     rgbStr: CoreFunc.formatRgb(item.rgb),
-  //     list: [],
-  //   })
-  // }
-
-  // removeColor = (id) => {
-  //   this.colorList = this.colorList.filter((color) => {
-  //     return color.id !== id;
-  //   })
-  // }
 
   listAllColors = () => {
     return this.colorList;
@@ -65,7 +46,7 @@ class ColorSelector extends Singleton{
       for (let i = 0; i < currentPos; i++) {
         let minIndex = CoreFunc.getMinValueIndexFromArray(newColor).index;
         newColor = newColor.map((el, idx) => {
-          if (idx === minIndex) return (el + 30) % 256;
+          if (idx === minIndex) return (el + 70) % 256;
           else return el;
         })
       }
@@ -78,3 +59,23 @@ class ColorSelector extends Singleton{
 }
 
 export default ColorSelector;
+
+
+
+  // addCustomColor = (item) => {
+  //   let lastId = this.colorList[this.colorList.length - 1].id
+  //   this.colorList.push({
+  //     id: lastId + 1,
+  //     color: item.color,
+  //     hex: item.hex,
+  //     rgb: item.rgb,
+  //     rgbStr: CoreFunc.formatRgb(item.rgb),
+  //     list: [],
+  //   })
+  // }
+
+  // removeColor = (id) => {
+  //   this.colorList = this.colorList.filter((color) => {
+  //     return color.id !== id;
+  //   })
+  // }

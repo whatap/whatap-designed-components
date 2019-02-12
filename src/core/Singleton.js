@@ -1,4 +1,5 @@
 'use strict';
+let Symbol = require('es6-symbol');
 const singleton = Symbol('singleton');
 
 export default class Singleton {
@@ -11,7 +12,7 @@ export default class Singleton {
   }
 
   constructor() {
-    let Class = new.target;
+    let Class = this.constructor;
 
     if (!Class[singleton]) {
       Class[singleton] = this;
