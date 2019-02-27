@@ -79,9 +79,20 @@ class ChartWrapper extends Component{
       try {
         if (that.mainDivWidth !== that.mainDiv.clientWidth
           || that.mainDivHeight !== that.mainDiv.clientHeight) {
-          that.resizeCanvas();
-          that.mainDivWidth = that.mainDiv.clientWidth;
-          that.mainDivHeight = that.mainDiv.clientHeight;
+
+          if (that.mainDiv.clientWidth === 0
+            || that.mainDiv.clientHeight === 0) {
+              /**
+               * V 0.8.5
+               * prevent rerendering causing trouble
+               */
+              clearInterval(that.chartInitSizing);
+          } else {
+            that.resizeCanvas();
+            that.mainDivWidth = that.mainDiv.clientWidth;
+            that.mainDivHeight = that.mainDiv.clientHeight;
+          }
+
         }
       } catch (e) {
         console.log("Resizing error");
