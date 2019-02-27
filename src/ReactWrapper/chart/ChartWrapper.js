@@ -31,7 +31,6 @@ class ChartWrapper extends Component{
     this.chart = new ChartCollection[type](id, options);
 
     if ( chartRef ) {
-      console.log(chartRef);
       chartRef(this.chart);
     }
 
@@ -72,17 +71,22 @@ class ChartWrapper extends Component{
     // }, 1);
 
     this.mainDivWidth = this.mainDiv.clientWidth;
+    this.mainDivHeight = this.mainDiv.clientHeight;
+    /**
+     * Circumventing a bug
+     */
     this.chartInitSizing = setInterval(() => {
       try {
-        if (that.mainDivWidth !== that.mainDiv.clientWidth) {
+        if (that.mainDivWidth !== that.mainDiv.clientWidth
+          || that.mainDivHeight !== that.mainDiv.clientHeight) {
           that.resizeCanvas();
           that.mainDivWidth = that.mainDiv.clientWidth;
+          that.mainDivHeight = that.mainDiv.clientHeight;
         }
       } catch (e) {
         console.log("Resizing error");
-        clearInterval(that.chartInitSizing);
       }
-    }, 1000);
+    }, 200);
 
     this.chart.setTheme(theme);
     this.chart.drawChart();
@@ -146,6 +150,12 @@ class ChartWrapper extends Component{
       </div>
     )
   }
+
+  componentWillUnmount() {
+    clearInterval(this.chartInitSizing);
+    delete this.chart;
+  }
+  
 }
 
 export default ChartWrapper;

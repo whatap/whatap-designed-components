@@ -356,7 +356,7 @@ class LineChart extends WChart{
     const { fixedMin, fixedMax }  = config.yAxis;
 
     dataset.map((ds, idx) => {
-      if (that.data.containsKey(ds.key)) {
+      if (that.data.containsKey(ds.key) && that.data.get(ds.key).data) {
         let cData = that.data.get(ds.key);
         ds.data.map((datum) => {
           /**
@@ -413,15 +413,22 @@ class LineChart extends WChart{
       let key = en.nextElement();
       let value = this.data.get(key);
 
-      if (value.data.length > this.maxPlot) {
-        let overflow = value.data.length - this.maxPlot;
-        value.data = value.data.slice(overflow);
+      /**
+       * V0.8.4
+       * (Bug fix) value가 undefined로 넘어오는 경우에 대한 fix
+       */
+      if (value.data) {
+        if (value.data.length > this.maxPlot) {
+          let overflow = value.data.length - this.maxPlot;
+          value.data = value.data.slice(overflow);
+        }
+        // that.setTimeStandard(value.data, idx);
+        if (value.data.length > 0) {
+          let timeStartEnd = this.getStartEndTime(value.data);
+          timeLimits.push(timeStartEnd);
+        }
       }
-      // that.setTimeStandard(value.data, idx);
-      if (value.data.length > 0) {
-        let timeStartEnd = this.getStartEndTime(value.data);
-        timeLimits.push(timeStartEnd);
-      }
+      
     }
 
     if (timeLimits.length > 0) {
@@ -458,7 +465,11 @@ class LineChart extends WChart{
       let prevXCoord = 0;
       let prevYCoord = 0;
 
-      let length = value.data.length;
+      /**
+       * V0.8.4
+       * (Bug fix) value가 undefined로 넘어오는 경우에 대한 fix
+       */
+      let length = value.data && value.data.length || 0;
       let lineInit = false;
       for (let i = 0; i < length; i++) {
         let datum = value.data[i];

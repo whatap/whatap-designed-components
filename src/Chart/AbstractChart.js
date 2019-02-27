@@ -112,6 +112,11 @@ class AbstractChart {
     setDpiSupport(this.canvas, this.ctx, this.ratio, this.bcRect);
   }
 
+  destroy = () => {
+    this.ctx = undefined
+    this.canvas = undefined;
+  }
+
 }
 
 export default AbstractChart;
