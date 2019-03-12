@@ -355,6 +355,9 @@ class LineChart extends WChart{
     let themeId = this.themeId;
     const { fixedMin, fixedMax }  = config.yAxis;
 
+    let currentMax = 0;
+    let currentMin = 0;
+
     dataset.map((ds, idx) => {
       if (that.data.containsKey(ds.key) && that.data.get(ds.key).data) {
         let cData = that.data.get(ds.key);
@@ -388,13 +391,17 @@ class LineChart extends WChart{
           } else {
             cData.data.push(datum);
           }
-          
-          if (!fixedMax && datum[1] > that.maxValue ) {
-            that.maxValue = getMaxValue(datum[1], plots);
-          } 
-          if (!fixedMin && datum[1] < that.minValue) {
-            that.minValue = datum[1];
-          }
+          /**
+           * V0.8.6
+           * (Bug fix) value가 한 번 올라간 다음에 다시 내려가지 않는 문제에 대한 fix
+           */
+          // if (!fixedMax && datum[1] > that.maxValue ) {
+          //   that.maxValue = getMaxValue(datum[1], plots);
+          // } 
+          // if (!fixedMin && datum[1] < that.minValue) {
+          //   that.minValue = datum[1];
+          // }
+
         })
 
         that.heapSort.sort(cData.data, false, 0);
@@ -426,10 +433,26 @@ class LineChart extends WChart{
         if (value.data.length > 0) {
           let timeStartEnd = this.getStartEndTime(value.data);
           timeLimits.push(timeStartEnd);
+
+          /**
+           * V0.8.6
+           * (Bug fix) value가 한 번 올라간 다음에 다시 내려가지 않는 문제에 대한 fix
+           */
+          value.data.map((vd) => {
+            if (vd[1] > currentMax) currentMax = vd[1];
+            if (vd[1] < currentMin) currentMin = vd[1];
+          })
         }
+
       }
-      
     }
+    /**
+     * V0.8.6
+     * (Bug fix) value가 한 번 올라간 다음에 다시 내려가지 않는 문제에 대한 fix
+     */
+    if (!fixedMax && currentMax !== 0) this.maxValue = getMaxValue(currentMax, plots);
+    if (!fixedMin && currentMin !== 0) this.minValue = currentMin;
+
 
     if (timeLimits.length > 0) {
       this.setTimeStandard(timeLimits)

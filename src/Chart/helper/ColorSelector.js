@@ -8,6 +8,7 @@ class ColorSelector extends Singleton{
     let that       = this;
     this.hash      = Math.random() * 1000;
     this.colorList = {};
+    this.keyList = []; // { key: number, id: idx }
     
     for (let theme in defaultPalette) {
       if (defaultPalette.hasOwnProperty(theme)) {
@@ -23,6 +24,7 @@ class ColorSelector extends Singleton{
             alpha: dp.alpha,
             rgbStr: CoreFunc.formatRgb(dp.rgb, dp.alpha),
             list: [],
+            count: 0
           })
         })
       }
@@ -33,7 +35,10 @@ class ColorSelector extends Singleton{
     return this.colorList;
   }
 
-  getColorFromId = (key, themeId) => {
+  /**
+   * @deprecated 2019.03.12
+   */
+  UNUSED_getColorFromId = (key, themeId) => {
     if (key === -1) return { rgb: nonInstanceColor.rgb, alpha: nonInstanceColor.alpha };
 
     let current = Math.abs(key) % this.colorList[themeId].length;
@@ -55,6 +60,32 @@ class ColorSelector extends Singleton{
       color.list.push(key);
       return { rgb: color.rgb, alpha: color.alpha };
     }
+  }
+
+  getColorFromId = (key, themeId = "wh") => {
+    if (key === -1) return { rgb: nonInstanceColor.rgb, alpha: nonInstanceColor.alpha };
+
+    const existsKeyset = this.keyList.find((keySet) => {
+      return keySet.key === key;
+    })
+
+    if (existsKeyset) {
+      const color = this.colorList[themeId][existsKeyset.id];
+      return { rgb: color.rgb, alpha: color.alpha };
+    } else {
+      let currentColor = this.colorList[themeId][0];
+      const color = this.colorList[themeId].find((colorP) => {
+        return colorP.count < currentColor.count;
+      })
+      if (color) currentColor = color;
+
+      currentColor.count += 1;
+      currentColor.list.push(key);
+      this.keyList.push({ key: key, id: currentColor.id })
+
+      return { rgb: currentColor.rgb, alpha: currentColor.alpha };
+    }
+    
   }
 }
 

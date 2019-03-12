@@ -87,28 +87,54 @@
 //   ]
 // }
 
+// export const defaultPalette = {
+//   'bk': [
+//     { color: 'indigo', hex: '#3F51B5', rgb: [63, 81, 181], alpha: 100},
+//     { color: 'blue', hex: '#2196F3', rgb: [33, 150, 243], alpha: 100},
+//     { color: 'purple', hex: '#7C4DFF', rgb: [124, 77, 255], alpha: 100},
+//     { color: 'cyan', hex: '#00BCD4', rgb: [0, 188, 212], alpha: 100},
+//     { color: 'blue_a400', hex: '#2979FF', rgb: [41, 121, 255], alpha: 100},
+//     { color: 'orange_300', hex: '#FFB74D', rgb: [255, 183, 77], alpha: 100},
+//     { color: 'light_green_400', hex: '#9CCC65', rgb: [156, 204, 101], alpha: 100},
+//   ],
+//   'wh': [
+//     { color: 'indigo', hex: '#3F51B5', rgb: [63, 81, 181], alpha: 100},
+//     { color: 'blue', hex: '#2196F3', rgb: [33, 150, 243], alpha: 100},
+//     { color: 'purple', hex: '#7C4DFF', rgb: [124, 77, 255], alpha: 100},
+//     { color: 'cyan', hex: '#00BCD4', rgb: [0, 188, 212], alpha: 100},
+//     { color: 'blue_a400', hex: '#2979FF', rgb: [41, 121, 255], alpha: 100},
+//     { color: 'orange_300', hex: '#FFB74D', rgb: [255, 183, 77], alpha: 100},
+//     { color: 'light_green_400', hex: '#9CCC65', rgb: [156, 204, 101], alpha: 100},
+//   ]
+// }
+
 export const defaultPalette = {
   'bk': [
-    { color: 'indigo', hex: '#3F51B5', rgb: [63, 81, 181], alpha: 100},
-    { color: 'blue', hex: '#2196F3', rgb: [33, 150, 243], alpha: 100},
-    { color: 'purple', hex: '#7C4DFF', rgb: [124, 77, 255], alpha: 100},
-    { color: 'cyan', hex: '#00BCD4', rgb: [0, 188, 212], alpha: 100},
-    { color: 'blue_a400', hex: '#2979FF', rgb: [41, 121, 255], alpha: 100},
-    { color: 'orange_300', hex: '#FFB74D', rgb: [255, 183, 77], alpha: 100},
-    { color: 'light_green_400', hex: '#9CCC65', rgb: [156, 204, 101], alpha: 100},
+    { color: 'deep_purple_200', hex: '#7c4dff', rgb: [124, 77, 255], alpha: 100},
+    { color: 'indigo_400', hex: '#3d5afe', rgb: [61, 90, 254], alpha: 100},
+    { color: 'blue_400', hex: '#2979ff', rgb: [41, 121, 255], alpha: 100},
+    { color: 'cyan_400', hex: '#00e5ff', rgb: [0, 229, 255], alpha: 100},
+    { color: 'teal_400', hex: '#1de9b6', rgb: [29, 233, 182], alpha: 100},
+    { color: 'green_400', hex: '#00e676', rgb: [0, 230, 118], alpha: 100},
+    { color: 'light_green_400', hex: '#76ff03', rgb: [118, 255, 3], alpha: 100},
+    { color: 'lime_400', hex: '#c6ff00', rgb: [198, 255, 0], alpha: 100},
+    { color: 'amber_400', hex: '#ffc400', rgb: [255, 196, 0], alpha: 100},
+    { color: 'orange_400', hex: '#ff9100', rgb: [255, 145, 0], alpha: 100},
   ],
   'wh': [
-    { color: 'indigo', hex: '#3F51B5', rgb: [63, 81, 181], alpha: 100},
-    { color: 'blue', hex: '#2196F3', rgb: [33, 150, 243], alpha: 100},
-    { color: 'purple', hex: '#7C4DFF', rgb: [124, 77, 255], alpha: 100},
-    { color: 'cyan', hex: '#00BCD4', rgb: [0, 188, 212], alpha: 100},
-    { color: 'blue_a400', hex: '#2979FF', rgb: [41, 121, 255], alpha: 100},
-    { color: 'orange_300', hex: '#FFB74D', rgb: [255, 183, 77], alpha: 100},
-    { color: 'light_green_400', hex: '#9CCC65', rgb: [156, 204, 101], alpha: 100},
+    { color: 'deep_purple_500', hex: '#673ab7', rgb: [103, 58, 183], alpha: 100},
+    { color: 'indigo_500', hex: '#3f51b5', rgb: [63, 81, 181], alpha: 100},
+    { color: 'blue_500', hex: '#2196f3', rgb: [33, 150, 243], alpha: 100},
+    { color: 'cyan_500', hex: '#00bcd4', rgb: [0, 188, 212], alpha: 100},
+    { color: 'teal_500', hex: '#009688', rgb: [0, 150, 136], alpha: 100},
+    { color: 'green_500', hex: '#4caf50', rgb: [76, 175, 80], alpha: 100},
+    { color: 'light_green_500', hex: '#8bc34a', rgb: [139, 195, 74], alpha: 100},
+    { color: 'lime_500', hex: '#cddc39', rgb: [205, 220, 57], alpha: 100},
+    { color: 'amber_500', hex: '#ffc107', rgb: [255, 193, 7], alpha: 100},
+    { color: 'orange_500', hex: '#ff9800', rgb: [255, 152, 0], alpha: 100},
   ]
 }
 
 export const nonInstanceColor = {
-  // color: 'blue', hex: '#5FB3F4', rgb: [95, 179, 244], alpha: 100
-  color: 'blue_a400', hex: '#2979ff', rgb: [41, 121, 255], alpha: 100
+  color: 'light_blue_a400', hex: '#03a9f4', rgb: [3, 169, 244], alpha: 100
 }
