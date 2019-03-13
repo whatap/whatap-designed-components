@@ -35,6 +35,32 @@ class ColorSelector extends Singleton{
     return this.colorList;
   }
 
+
+  /**
+   * @public
+   * @description add theme to the color list
+   * @params { key: string, theme: object }
+   */
+  addTheme = (key, theme) => {
+    const self = this;
+    if (!this.colorList[key]) {
+      this.colorList[key] = key;
+
+      theme.forEach((tp, idx) => {
+        self.colorList[key].push({
+          id: idx,
+          color: tp.color,
+          hex: tp.hex,
+          rgb: tp.rgb,
+          alpha: tp.alpha,
+          rgbStr: CoreFunc.formatRgb(tp.rgb, tp.alpha),
+          list: [],
+          count: 0
+        })
+      })
+    }
+  }
+
   /**
    * @deprecated 2019.03.12
    */
