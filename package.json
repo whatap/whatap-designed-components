@@ -1,6 +1,6 @@
 {
   "name": "whatap-designed-components",
-  "version": "0.8.8",
+  "version": "0.8.81",
   "description": "Designed components used at WhaTap",
   "main": "src/index.js",
   "module": "es/index.js",

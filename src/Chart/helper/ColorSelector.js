@@ -44,7 +44,7 @@ class ColorSelector extends Singleton{
   addTheme = (key, theme) => {
     const self = this;
     if (!this.colorList[key]) {
-      this.colorList[key] = key;
+      this.colorList[key] = [];
 
       theme.forEach((tp, idx) => {
         self.colorList[key].push({
