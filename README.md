@@ -1,5 +1,7 @@
 ![WhaTap Logo](whatap-logo.png)
 
+in beta
+
 # whatap-designed-components
 
 whatap-designed-components consists set of utilities and components used commonly in WhaTap's monitoring products.
