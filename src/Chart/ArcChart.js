@@ -61,39 +61,51 @@ class ArcChart extends AbstractChart{
   }
 
   drawChart = () => {
-    const ctx = this.ctx;
+    const { ctx, config, total, bcRect, data } = this;
+    const semiCircle = config.semiCircle;
     ctx.save();
-    const width = this.bcRect.width;
+    const width = bcRect.width;
     const halfWidth = width/2;
-    const height = this.bcRect.height;
+    const x = halfWidth;
+    const height = bcRect.height;
     const halfHeight = height/2;
-    const diameter = width > height ? height : width;
-    const doublePI = Math.PI*2;
+    const y = semiCircle ? height : halfHeight;
+    const diameter = semiCircle ? (width > height * 2 ? height * 2 : width) : (width > height ? height : width);
+    const lengthPI = semiCircle ? Math.PI : Math.PI*2;
     const radius = diameter/2;
     const circleInner = radius * 0.7;
 
     ctx.clearRect(0, 0, width, height);
-    let en = this.data.keys();
+    let en = data.keys();
 
-    let thisRadian = Math.PI/2;
-    while(en.hasMoreElements()){
-      const key = en.nextElement();
-      const value = this.data.get(key);
-      const percent = value.data/this.total;
-      const nextRadian = thisRadian + doublePI * percent;
+    let thisRadian = semiCircle ? Math.PI : Math.PI/2;
+    if(!total){
       ctx.beginPath();
-      ctx.fillStyle = value.color;
-      ctx.arc(halfWidth, halfHeight, radius, thisRadian, nextRadian, false);
-      ctx.arc(halfWidth, halfHeight, circleInner, nextRadian, thisRadian, true);
+      ctx.fillStyle = "rgba(216, 216, 216, 1)";
+      const nextRadian = thisRadian + Math.PI*2;
+      ctx.arc(x, y, radius, thisRadian, nextRadian, false);
+      ctx.arc(x, y, circleInner, nextRadian, thisRadian, true);
       ctx.fill();
-
-      thisRadian = nextRadian;
+    }else{
+      while(en.hasMoreElements()){
+        const key = en.nextElement();
+        const value = data.get(key);
+        const percent = value.data/total;
+        const nextRadian = thisRadian + lengthPI * percent;
+        ctx.beginPath();
+        ctx.fillStyle = value.color;
+        ctx.arc(x, y, radius, thisRadian, nextRadian, false);
+        ctx.arc(x, y, circleInner, nextRadian, thisRadian, true);
+        ctx.fill();
+  
+        thisRadian = nextRadian;
+      }
     }
 
     ctx.font = `13px ${FONT_TYPE}`;
     ctx.textAlign = "center";
     ctx.fillStyle = "rgba(0, 0, 0, 1)";
-    ctx.fillText(this.config.title, halfWidth, halfHeight + 6);
+    ctx.fillText(config.title, x, y + (semiCircle ? -15 : 6));
 
     ctx.restore();
   }
