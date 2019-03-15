@@ -63,23 +63,26 @@ class ArcChart extends AbstractChart{
   drawChart = () => {
     const { ctx, config, total, bcRect, data } = this;
     const semiCircle = config.semiCircle;
+    const title = config.title || 'Data';
     ctx.save();
-    const width = bcRect.width;
+    const width = bcRect.width; // Canvas Width 
+    const circleWidth = 0.3; // Cirle weight 0 ~ 1
     const halfWidth = width/2;
-    const x = halfWidth;
-    const height = bcRect.height;
+    const x = halfWidth; // Center of circle xAxis
+    const height = bcRect.height; // Canvas Height
     const halfHeight = height/2;
-    const y = semiCircle ? height : halfHeight;
-    const diameter = semiCircle ? (width > height * 2 ? height * 2 : width) : (width > height ? height : width);
-    const lengthPI = semiCircle ? Math.PI : Math.PI*2;
+    const y = semiCircle ? height : halfHeight; // Center of circle yAxis
+    const diameter = semiCircle ? (width > height * 2 ? height * 2 : width) : (width > height ? height : width); // Diameter of circle
+    const textMax = diameter * (0.9 - circleWidth) // Text Wrapper Width
+    const lengthPI = semiCircle ? Math.PI : Math.PI*2; 
     const radius = diameter/2;
-    const circleInner = radius * 0.7;
+    const circleInner = radius * 0.7; // Use to draw the inner line of circle
 
     ctx.clearRect(0, 0, width, height);
     let en = data.keys();
 
     let thisRadian = semiCircle ? Math.PI : Math.PI/2;
-    if(!total){
+    if(!total){ // totla === 0 || data empty
       ctx.beginPath();
       ctx.fillStyle = "rgba(216, 216, 216, 1)";
       const nextRadian = thisRadian + Math.PI*2;
@@ -87,7 +90,7 @@ class ArcChart extends AbstractChart{
       ctx.arc(x, y, circleInner, nextRadian, thisRadian, true);
       ctx.fill();
     }else{
-      while(en.hasMoreElements()){
+      while(en.hasMoreElements()){ //Draw arc
         const key = en.nextElement();
         const value = data.get(key);
         const percent = value.data/total;
@@ -105,7 +108,31 @@ class ArcChart extends AbstractChart{
     ctx.font = `13px ${FONT_TYPE}`;
     ctx.textAlign = "center";
     ctx.fillStyle = "rgba(0, 0, 0, 1)";
-    ctx.fillText(config.title, x, y + (semiCircle ? -15 : 6));
+
+    let lineHeight = 13 * 1.286;
+    let words = title.split(' ');
+    let line = '';
+    let textY = y + (semiCircle ? -15 : 6);
+    const wordsLength = words.length;
+    let newLine = false;
+    for(let i = 0; i < wordsLength; i++){ //Long text \n function 
+      const testLine = line + words[i] + ' ';
+      const metrics = ctx.measureText(testLine);
+      const testWidth = metrics.width;
+
+      if(testWidth > textMax && line !== ''){ // max 2 line
+        ctx.fillText(line, x, textY - (lineHeight/2));
+        ctx.fillText(title.replace(line, ''), x, textY + (lineHeight/2));
+        newLine = true;
+        break;
+      }else{
+        line = testLine;
+      }
+    }
+
+    if(!newLine){
+      ctx.fillText(title, x, textY);
+    }
 
     ctx.restore();
   }
