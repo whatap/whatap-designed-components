@@ -122,19 +122,31 @@ export const defaultPalette = {
     { color: 'orange_400', hex: '#ff9100', rgb: [255, 145, 0], alpha: 100},
   ],
   'wh': [
-    { color: 'deep_purple_500', hex: '#673ab7', rgb: [103, 58, 183], alpha: 100},
-    { color: 'indigo_500', hex: '#3f51b5', rgb: [63, 81, 181], alpha: 100},
-    { color: 'blue_500', hex: '#2196f3', rgb: [33, 150, 243], alpha: 100},
-    { color: 'cyan_500', hex: '#00bcd4', rgb: [0, 188, 212], alpha: 100},
-    { color: 'teal_500', hex: '#009688', rgb: [0, 150, 136], alpha: 100},
-    { color: 'green_500', hex: '#4caf50', rgb: [76, 175, 80], alpha: 100},
-    { color: 'light_green_500', hex: '#8bc34a', rgb: [139, 195, 74], alpha: 100},
-    { color: 'lime_500', hex: '#cddc39', rgb: [205, 220, 57], alpha: 100},
-    { color: 'amber_500', hex: '#ffc107', rgb: [255, 193, 7], alpha: 100},
-    { color: 'orange_500', hex: '#ff9800', rgb: [255, 152, 0], alpha: 100},
+    { color: 'indigo_226cff', hex: '#226CFF', rgb: [34, 108, 255], alpha: 100},
+    { color: 'deep_a978ff', hex: '#A978FF', rgb: [169, 120, 255], alpha: 100},
+    { color: 'light_40c4ff', hex: '#40C4FF', rgb: [64, 196, 255], alpha: 100},
+    { color: 'cyan_2ba4b3', hex: '#2BA4B3', rgb: [43, 164, 179], alpha: 100},
+    { color: 'orange_ffa531', hex: '#FFA531', rgb: [255, 165, 49], alpha: 100},
+    { color: 'green_00d659', hex: '#00D659', rgb: [0, 214, 89], alpha: 100},
+    { color: 'amber_ffcc00', hex: '#2196F3', rgb: [255, 204, 0], alpha: 100},
+    { color: 'lime_b7c400', hex: '#B7C400', rgb: [183, 196, 0], alpha: 100},
+    // { color: 'deep_purple_500', hex: '#673ab7', rgb: [103, 58, 183], alpha: 100},
+    // { color: 'indigo_500', hex: '#3f51b5', rgb: [63, 81, 181], alpha: 100},
+    // { color: 'blue_500', hex: '#2196f3', rgb: [33, 150, 243], alpha: 100},
+    // { color: 'cyan_500', hex: '#00bcd4', rgb: [0, 188, 212], alpha: 100},
+    // { color: 'teal_500', hex: '#009688', rgb: [0, 150, 136], alpha: 100},
+    // { color: 'green_500', hex: '#4caf50', rgb: [76, 175, 80], alpha: 100},
+    // { color: 'light_green_500', hex: '#8bc34a', rgb: [139, 195, 74], alpha: 100},
+    // { color: 'lime_500', hex: '#cddc39', rgb: [205, 220, 57], alpha: 100},
+    // { color: 'amber_500', hex: '#ffc107', rgb: [255, 193, 7], alpha: 100},
+    // { color: 'orange_500', hex: '#ff9800', rgb: [255, 152, 0], alpha: 100},
   ]
 }
 
 export const nonInstanceColor = {
-  color: 'light_blue_a400', hex: '#03a9f4', rgb: [3, 169, 244], alpha: 100
+  color: 'blue_2196f3', hex: '#2196F3', rgb: [33, 150, 243], alpha: 100
 }
+
+// export const nonInstanceColor = {
+//   color: 'light_blue_a400', hex: '#03a9f4', rgb: [3, 169, 244], alpha: 100
+// }

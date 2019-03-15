@@ -81,7 +81,7 @@ class ArcChart extends AbstractChart{
     ctx.clearRect(0, 0, width, height);
     let en = data.keys();
 
-    let thisRadian = semiCircle ? Math.PI : Math.PI/2;
+    let thisRadian = semiCircle ? Math.PI : - ( Math.PI / 2 );
     if(!total){ // totla === 0 || data empty
       ctx.beginPath();
       ctx.fillStyle = "rgba(216, 216, 216, 1)";
