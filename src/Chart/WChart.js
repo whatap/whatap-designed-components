@@ -280,11 +280,14 @@ class WChart extends AbstractChart {
     ctx.font = `${FONT_SIZE}px ${FONT_TYPE}`
     // ctx.save();
 
+    const calcWidth = width - this.chartAttr.x - config.common.offset.right;
+    const calcHeight = (config.xAxis.tick.display) ? height - this.chartAttr.y - 20 - config.common.offset.bottom : height - this.chartAttr.y - 5 - config.common.offset.bottom;
+
     let yAxisMax     = this.config.yAxis.tick.format(this.maxValue);
     this.chartAttr.x = (config.yAxis.tick.display) ? parseInt(ctx.measureText(yAxisMax).width) + CHART_TICK_SPACE + CHART_TICK_OFFSET_X + config.common.offset.left : CHART_NON_TICK_OFFSET_X + config.common.offset.left;
     this.chartAttr.y = (config.xAxis.tick.display) ? 10 + config.common.offset.top : 10 + config.common.offset.top;
-    this.chartAttr.w = width - this.chartAttr.x - config.common.offset.right;
-    this.chartAttr.h = (config.xAxis.tick.display) ? height - this.chartAttr.y - 20 - config.common.offset.bottom : height - this.chartAttr.y - 5 - config.common.offset.bottom;
+    this.chartAttr.w = calcWidth > 0 ? calcWidth : 0;
+    this.chartAttr.h = calcHeight > 0 ? calcHeight : 0;
     this.plots       = typeof config.yAxis.maxPlots === "number" ? config.yAxis.maxPlots : calculatePlots(this.chartAttr.h);
 
     ctx.fillStyle = "rgba(0,0,0,0)";

@@ -86,7 +86,7 @@ class ChartWrapper extends Component{
                * V 0.8.5
                * prevent rerendering causing trouble
                */
-              clearInterval(that.chartInitSizing);
+              // clearInterval(that.chartInitSizing);
           } else {
             that.resizeCanvas();
             that.mainDivWidth = that.mainDiv.clientWidth;
