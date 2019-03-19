@@ -7,6 +7,9 @@ const config = {
   entry: {
     main: './index_umd.js'
   },
+  resolve: {
+    extensions: [ '.ts', '.tsx', '.js' ]
+  },
   output: {
     path: path.resolve(__dirname, 'umd'),
     libraryTarget: 'umd',
@@ -16,7 +19,7 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(js|tsx|ts|jsx)$/,
         include: [path.resolve(__dirname, 'src'), /node_modules\/lodash.merge/ ],
         exclude: [/(node_modules)/, path.resolve(__dirname, 'src/ReactWrapper'), path.resolve(__dirname, 'src/index.js')],
         loader: "babel-loader"

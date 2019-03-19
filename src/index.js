@@ -9,6 +9,7 @@ import {
 } from './core';
 import {
   LineChart,
+  HitmapChart,
   ChartMediator,
   PublicLegend
 } from './Chart';
@@ -25,6 +26,7 @@ export {
   HeapSort,
   Button,
   LineChart,
+  HitmapChart,
   ChartMediator,
   PublicLegend,
   ChartWrapper,
